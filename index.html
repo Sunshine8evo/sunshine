@@ -25,11 +25,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .nav-right{margin-left:auto;display:flex;align-items:center;border-left:var(--bd2)}
 .nav-icon-btn{padding:10px 12px;cursor:pointer;color:var(--t2);display:flex;align-items:center;gap:4px;font-size:12px;border-right:var(--bd2);transition:background .15s;white-space:nowrap;position:relative}
 .nav-icon-btn:hover{background:var(--sf2)}.nav-icon-btn i{font-size:14px}
-.lang-dropdown{position:absolute;top:100%;right:0;background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:300;min-width:160px;overflow:hidden;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)}
-.lang-dropdown.on{display:block}
-.lang-item{padding:9px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
-.lang-item:hover{background:var(--sf2)}.lang-item.on{color:var(--rose);font-weight:500}
+.lang-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.lang-popup-item{padding:10px 12px;border:var(--bd2);border-radius:var(--r);cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;transition:all .15s}
+.lang-popup-item:hover{border-color:var(--rose);background:var(--rose-l)}
+.lang-popup-item.on{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d);font-weight:500}
 .lang-flag{font-size:16px}
+.modal-center{align-items:center;padding-top:0}
+.modal-lg{width:560px}
+.modal-xl{width:640px}
 
 /* PAGES */
 .page{display:none;padding:16px;max-width:1400px;margin:0 auto}.page.on{display:block}
@@ -70,8 +73,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .time-row{display:grid;border-bottom:0.5px solid #ececec}
 .time-lbl{padding:4px 8px;font-size:10px;color:var(--t2);border-right:var(--bd);display:flex;align-items:flex-start;padding-top:5px;white-space:nowrap;min-height:36px}
 .tcell{border-right:var(--bd);position:relative;min-height:36px}.tcell:last-child{border-right:none}
-.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:pointer;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s}
-.bk-block:hover{opacity:.82}
+.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:grab;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s,box-shadow .15s;display:flex;flex-direction:column}
+.bk-block:hover{opacity:.95;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.bk-block.dragging{opacity:.5;cursor:grabbing}
+.bk-block.no-drag{cursor:default}
+.bk-block.no-drag:hover{box-shadow:none}
+.tcell.drop-over{background:var(--rose-l);outline:1px dashed var(--rose)}
+.bb-actions{display:flex;flex-wrap:wrap;gap:2px;margin-top:auto;padding-top:2px}
+.bb-btn{font-size:8px;padding:1px 4px;border:1px solid #ddd;border-radius:3px;cursor:pointer;background:#fff;white-space:nowrap;line-height:1.3}
+.bb-btn:hover{background:var(--sf2);border-color:var(--rose)}
+.bk-view-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:12px}
+.bk-view-tab{padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
+.bk-view-tab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}
+.wk-grid{min-width:800px}
+.wk-hcell{text-align:center}
+.wk-hcell small{display:block;font-size:9px;color:var(--t2);font-weight:400;margin-top:1px}
+.wk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 4px;font-size:9px;z-index:1;border-left:3px solid transparent;overflow:hidden;cursor:pointer}
 .bb-yellow{background:#fef9e7;border-left-color:#d4a017;color:#7d5a00}.bb-blue{background:#eaf3fc;border-left-color:#2271c3;color:#0c447c}
 .bb-green{background:#eaf6ef;border-left-color:#2a8a52;color:#185a32}.bb-gray{background:#f4f4f4;border-left-color:#999;color:#555}
 .bb-name{font-weight:500;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -172,6 +189,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .top-name{flex:1;font-weight:500}.top-val{color:var(--rose);font-weight:500}
 .tgl{width:34px;height:18px;background:#ccc;border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
 .tgl.on{background:var(--rose)}.tgl::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}.tgl.on::after{transform:translateX(16px)}
+
+/* CLIENTS */
+.cl-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.cl-search{padding:7px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);font-size:12px;width:220px;outline:none}
+.cl-search:focus{border-color:var(--rose)}
+.cl-table{width:100%;border-collapse:collapse;font-size:12px;border:var(--bd);border-radius:var(--rl);overflow:hidden}
+.cl-table th{text-align:left;padding:10px 14px;font-size:10px;color:var(--t2);font-weight:500;background:var(--sf2);border-bottom:var(--bd)}
+.cl-table td{padding:11px 14px;border-bottom:var(--bd);vertical-align:middle}
+.cl-table tbody tr:last-child td{border-bottom:none}
+.cl-table tbody tr:hover td{background:var(--sf2)}
+.cl-name-link{color:var(--rose);font-weight:500;cursor:pointer;text-decoration:none}
+.cl-name-link:hover{text-decoration:underline}
+.cl-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:16px;font-size:12px}
+.cl-info-item label{display:block;font-size:10px;color:var(--t2);margin-bottom:2px}
+.cl-info-item span{font-weight:500}
+.cl-history{margin-top:12px;border-top:var(--bd);padding-top:12px}
+.cl-history h4{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:8px}
+.cl-hist-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--sf2);border:var(--bd);border-radius:var(--r);margin-bottom:5px;font-size:11px;flex-wrap:wrap}
+.cl-hist-date{color:var(--t2);min-width:90px;font-family:var(--font-mono);font-size:10px}
+.cl-hist-svc{flex:1;font-weight:500}
+.cl-hist-staff{color:var(--blue);font-size:10px}
+.cl-hist-intake{font-size:10px;color:var(--rose);cursor:pointer;text-decoration:underline}
+.cl-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:var(--bd)}
 </style>
 </head>
 <body>
@@ -209,24 +249,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-logo"><i class="ti ti-spa"></i>Sunshine</div>
-  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_booking">Booking</span></div>
+  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_calendar">Calendar</span></div>
+  <div class="ntab" onclick="showPage('clients')" id="tab-clients" data-roles="owner,manager,reception"><i class="ti ti-users"></i><span class="t" data-k="nav_clients">Clients</span></div>
   <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
   <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
   <div class="ntab" onclick="showPage('payroll')" id="tab-payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span class="t" data-k="nav_payroll">Payroll</span></div>
   <div class="ntab" onclick="showPage('sales')" id="tab-sales" data-roles="owner,manager,reception"><i class="ti ti-chart-bar"></i><span class="t" data-k="nav_sales">Sales Summary</span></div>
   <div class="nav-right">
-    <div class="nav-icon-btn" id="lang-btn" onclick="toggleLang()">
+    <div class="nav-icon-btn" id="lang-btn" onclick="openLangPopup()">
       <i class="ti ti-language"></i>
       <span id="cur-lang-label">🇺🇸 EN</span>
       <i class="ti ti-chevron-down" style="font-size:10px"></i>
-      <div class="lang-dropdown" id="lang-menu">
-        <div class="lang-item on" onclick="setLang('en');event.stopPropagation()"><span class="lang-flag">🇺🇸</span>English</div>
-        <div class="lang-item" onclick="setLang('th');event.stopPropagation()"><span class="lang-flag">🇹🇭</span>ภาษาไทย</div>
-        <div class="lang-item" onclick="setLang('zh');event.stopPropagation()"><span class="lang-flag">🇨🇳</span>中文</div>
-        <div class="lang-item" onclick="setLang('es');event.stopPropagation()"><span class="lang-flag">🇪🇸</span>Español</div>
-        <div class="lang-item" onclick="setLang('ja');event.stopPropagation()"><span class="lang-flag">🇯🇵</span>日本語</div>
-        <div class="lang-item" onclick="setLang('ko');event.stopPropagation()"><span class="lang-flag">🇰🇷</span>한국어</div>
-      </div>
     </div>
     <div class="nav-icon-btn" id="nav-user-info" style="gap:6px;padding:8px 12px">
       <span id="nav-avatar" style="width:24px;height:24px;border-radius:50%;background:#fdf0f3;color:#8a1a30;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">O</span>
@@ -272,10 +305,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <button class="btn btn-p" onclick="openModal('newbk')"><i class="ti ti-plus"></i><span class="t" data-k="new_booking">New Booking</span></button>
     </div>
   </div>
-  <div style="display:flex;gap:0;border-bottom:var(--bd);margin-bottom:12px">
-    <div style="padding:6px 12px;font-size:12px;color:var(--rose);border-bottom:2px solid var(--rose);font-weight:500;cursor:pointer" class="t" data-k="daily">Daily</div>
-    <div style="padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer" class="t" data-k="weekly">Weekly</div>
-    <div style="padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer" class="t" data-k="monthly">Monthly</div>
+  <div class="bk-view-tabs" id="bk-view-tabs">
+    <div class="bk-view-tab on" onclick="setBkView('today',this)"><span class="t" data-k="today_view">Today</span></div>
+    <div class="bk-view-tab" onclick="setBkView('weekly',this)"><span class="t" data-k="weekly">Weekly</span></div>
   </div>
   <div class="sch-wrap"><div class="sch-grid" id="sch-grid"></div></div>
   <div class="legend">
@@ -284,6 +316,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div class="leg-item"><div class="leg-dot" style="background:#2a8a52"></div><span class="t" data-k="in_service">In Service</span></div>
     <div class="leg-item"><div class="leg-dot" style="background:#999"></div><span class="t" data-k="completed">Completed</span></div>
     <div class="leg-item"><i class="ti ti-star" style="font-size:11px;color:#d48b1a"></i><span class="t" data-k="staff_request">Staff Request</span></div>
+  </div>
+</div>
+
+<!-- ===== CLIENTS PAGE ===== -->
+<div id="page-clients" class="page">
+  <div class="cl-toolbar">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_clients">Clients</div>
+    <input type="text" class="cl-search" id="cl-search" placeholder="Search name or phone..." oninput="renderClients()">
+  </div>
+  <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
+    <table class="cl-table">
+      <thead><tr>
+        <th class="t" data-k="col_name">Name — Surname</th>
+        <th class="t" data-k="col_tel">Tel.</th>
+      </tr></thead>
+      <tbody id="cl-body"></tbody>
+    </table>
   </div>
 </div>
 
@@ -604,32 +653,89 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
   </div>
 </div>
 
+<div id="modal-lang" class="modal-bg modal-center">
+  <div class="modal" style="width:360px">
+    <h3><i class="ti ti-language" style="color:var(--rose)"></i> <span class="t" data-k="select_language">Select Language</span><span class="modal-close" onclick="closeModal('lang')">&times;</span></h3>
+    <div class="lang-popup-grid" id="lang-popup-grid"></div>
+  </div>
+</div>
+
+<div id="modal-client" class="modal-bg modal-center">
+  <div class="modal modal-xl">
+    <h3><span id="cl-modal-title">Client</span><span class="modal-close" onclick="closeModal('client')">&times;</span></h3>
+    <div class="cl-info-grid" id="cl-info-grid"></div>
+    <div class="cl-history">
+      <h4 class="t" data-k="booking_history">Booking History</h4>
+      <div id="cl-history-list"></div>
+    </div>
+    <div class="cl-actions">
+      <button class="btn btn-sm" onclick="clientAction('reschedule')"><i class="ti ti-calendar-event"></i><span class="t" data-k="reschedule">Reschedule</span></button>
+      <button class="btn btn-p btn-sm" onclick="clientAction('bookagain')"><i class="ti ti-repeat"></i><span class="t" data-k="book_again">Book again</span></button>
+      <button class="btn btn-sm" onclick="clientAction('edit')"><i class="ti ti-edit"></i><span class="t" data-k="edit_personal">Edit personal information</span></button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editclient" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span class="t" data-k="edit_personal">Edit personal information</span><span class="modal-close" onclick="closeModal('editclient')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="ec-fname"></div><div class="fg"><label>Last Name</label><input type="text" id="ec-lname"></div></div>
+    <div class="fg-row"><div class="fg"><label>Date of Birth</label><input type="date" id="ec-dob"></div><div class="fg"><label>Tel.</label><input type="tel" id="ec-tel"></div></div>
+    <div class="fg"><label>Email</label><input type="email" id="ec-email"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('editclient')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="saveEditClient()"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-bkdetail" class="modal-bg modal-center">
+  <div class="modal">
+    <h3><span class="t" data-k="booking_detail">Booking Detail</span><span class="modal-close" onclick="closeModal('bkdetail')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" id="bd-fname" readonly></div><div class="fg"><label>Last Name</label><input type="text" id="bd-lname" readonly></div></div>
+    <div class="fg"><label>Phone</label><input type="tel" id="bd-phone" readonly></div>
+    <div class="fg-row"><div class="fg"><label>Date</label><input type="date" id="bd-date" readonly></div><div class="fg"><label>Time</label><input type="time" id="bd-time" readonly></div></div>
+    <div class="fg"><label>Main Service</label><input type="text" id="bd-svc" readonly></div>
+    <div class="fg-row"><div class="fg"><label>Duration</label><input type="text" id="bd-dur" readonly></div><div class="fg"><label>Staff Request</label><input type="text" id="bd-staff" readonly></div></div>
+    <div class="fg"><label>Add-on</label><input type="text" id="bd-addon" readonly></div>
+    <div class="fg"><label>Notes</label><input type="text" id="bd-notes" readonly></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('bkdetail')">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
-  en:{nav_booking:'Booking',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave'},
-  th:{nav_booking:'จองออนไลน์',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด'},
+  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name — Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',intake_form:'Intake form',checkout:'Check out',detail:'Detail',dob:'Date of Birth',email:'Email',age:'Age',view_intake:'View intake form'},
+  th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form'},
   zh:{nav_booking:'在线预约',nav_display:'排队显示',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假'},
   es:{nav_booking:'Reservas',nav_display:'Cola',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja'},
   ja:{nav_booking:'予約',nav_display:'待ち行列',nav_settings:'設定',nav_payroll:'給与',nav_sales:'売上概要',logout:'ログアウト',new_booking:'新規予約',all_staff:'全スタッフ',daily:'日次',weekly:'週次',monthly:'月次',yearly:'年次',today:'今日',pending:'保留中',confirmed:'確認済',in_service:'施術中',completed:'完了',staff_request:'スタッフ指名',queue_today:'本日の予約',col_time:'予約/時間',col_inout:'入室 — 退室',col_guest:'顧客/サービス',col_staff:'スタッフ',col_room:'部屋',next_queue:'次の顧客',menu_staff:'スタッフ',menu_services:'サービス',menu_rooms:'部屋',menu_hours:'営業時間',menu_roles:'役割',menu_notify:'通知',menu_shop:'店舗情報',manage_staff:'スタッフ管理',add_staff:'スタッフ追加',main_services:'主要サービス',add_service:'サービス追加',rooms:'部屋',business_hours:'営業時間',roles:'役割設定',notifications:'通知設定',shop_info:'店舗情報',period:'期間:',pay_salary:'給与支払',staff_cost:'人件費',ready:'勤務中',on_leave:'休暇中'},
   ko:{nav_booking:'예약',nav_display:'대기 현황',nav_settings:'설정',nav_payroll:'급여',nav_sales:'매출 요약',logout:'로그아웃',new_booking:'새 예약',all_staff:'전체 직원',daily:'일별',weekly:'주별',monthly:'월별',yearly:'연별',today:'오늘',pending:'대기중',confirmed:'확인됨',in_service:'서비스중',completed:'완료',staff_request:'직원 지정',queue_today:'오늘 예약',col_time:'예약/시간',col_inout:'입실 — 퇴실',col_guest:'고객/서비스',col_staff:'직원',col_room:'룸',next_queue:'다음 순서',menu_staff:'직원',menu_services:'서비스',menu_rooms:'룸',menu_hours:'영업시간',menu_roles:'역할',menu_notify:'알림',menu_shop:'매장정보',manage_staff:'직원 관리',add_staff:'직원 추가',main_services:'주요 서비스',add_service:'서비스 추가',rooms:'룸',business_hours:'영업시간',roles:'역할 설정',notifications:'알림 설정',shop_info:'매장 정보',period:'기간:',pay_salary:'급여 지급',staff_cost:'인건비',ready:'근무중',on_leave:'휴가중'}
 };
+const LANG_OPTIONS=[{k:'en',f:'🇺🇸',n:'English'},{k:'th',f:'🇹🇭',n:'ภาษาไทย'},{k:'zh',f:'🇨🇳',n:'中文'},{k:'es',f:'🇪🇸',n:'Español'},{k:'ja',f:'🇯🇵',n:'日本語'},{k:'ko',f:'🇰🇷',n:'한국어'}];
 const MONTH_NAMES={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],th:['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],zh:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],es:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],ja:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],ko:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']};
 const DAYS_ABBR={en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],th:['อา','จ','อ','พ','พฤ','ศ','ส'],zh:['日','一','二','三','四','五','六'],es:['Do','Lu','Ma','Mi','Ju','Vi','Sa'],ja:['日','月','火','水','木','金','土'],ko:['일','월','화','수','목','금','토']};
 
 let currentLang='en';
-function tr(k){return(LANGS[currentLang]||LANGS.en)[k]||k}
+function tr(k){return((LANGS[currentLang]||{})[k]??LANGS.en[k])||k}
 function applyLang(){document.querySelectorAll('.t[data-k]').forEach(el=>{el.textContent=tr(el.dataset.k)})}
 function setLang(l){
   currentLang=l;
-  const flags={en:'🇺🇸',th:'🇹🇭',zh:'🇨🇳',es:'🇪🇸',ja:'🇯🇵',ko:'🇰🇷'};
-  document.getElementById('cur-lang-label').textContent=`${flags[l]} ${l.toUpperCase()}`;
-  document.querySelectorAll('.lang-item').forEach(i=>i.classList.remove('on'));
-  applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();buildCalGrids();updateDateLbl();buildBkCal();
-  document.getElementById('lang-menu').classList.remove('on');
+  const opt=LANG_OPTIONS.find(o=>o.k===l)||LANG_OPTIONS[0];
+  document.getElementById('cur-lang-label').textContent=`${opt.f} ${l.toUpperCase()}`;
+  buildLangPopup();
+  applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();renderClients();buildCalGrids();updateDateLbl();buildBkCal();
+  closeModal('lang');
 }
-function toggleLang(){document.getElementById('lang-menu').classList.toggle('on')}
-document.addEventListener('click',function(e){if(!e.target.closest('#lang-btn')){const m=document.getElementById('lang-menu');if(m)m.classList.remove('on')}});
+function openLangPopup(){buildLangPopup();openModal('lang')}
+function buildLangPopup(){
+  const g=document.getElementById('lang-popup-grid');
+  if(!g)return;
+  g.innerHTML=LANG_OPTIONS.map(o=>`<div class="lang-popup-item ${currentLang===o.k?'on':''}" onclick="setLang('${o.k}')"><span class="lang-flag">${o.f}</span>${o.n}</div>`).join('');
+}
 
 /* ==================== CALENDAR PICKER ==================== */
 const calState={pr:{year:2026,month:4},sl:{year:2026,month:4}};
@@ -709,27 +815,185 @@ const ADDONS_DATA=[{name:'Aromatherapy',price:'100'},{name:'Hot Stones',price:'2
 const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
 const HOURS_DATA=[{d:'Monday',open:true,from:'10:00',to:'21:00'},{d:'Tuesday',open:true,from:'10:00',to:'21:00'},{d:'Wednesday',open:true,from:'10:00',to:'21:00'},{d:'Thursday',open:true,from:'10:00',to:'21:00'},{d:'Friday',open:true,from:'10:00',to:'22:00'},{d:'Saturday',open:true,from:'09:00',to:'22:00'},{d:'Sunday',open:false,from:'10:00',to:'18:00'}];
 const INTAKE_FIELDS=[{label:'Full Name',type:'text'},{label:'Age',type:'number'},{label:'Phone',type:'tel'},{label:'Medical Conditions',type:'text'},{label:'Allergies',type:'text'},{label:'Pregnant',type:'yesno'},{label:'Recent Surgery',type:'text'},{label:'Pressure Preference',type:'select'},{label:'Notes',type:'text'}];
-const ROLES=[{key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',tc:'#8a1a30',perms:['Booking','Queue','Settings','Payroll','Sales']},{key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',tc:'#0c447c',perms:['Booking','Queue','Settings','Payroll','Sales']},{key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',tc:'#7d5a00',perms:['Booking','Queue','Sales']},{key:'staff',label:'Staff',icon:'ti-user',color:'#f4f4f4',tc:'#555',perms:['Booking','Queue','Payroll (own)']}];
+const ROLES=[{key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',tc:'#8a1a30',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',tc:'#0c447c',perms:['Calendar','Clients','Queue','Settings','Payroll','Sales']},{key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',tc:'#7d5a00',perms:['Calendar','Clients','Queue','Sales']},{key:'staff',label:'Staff',icon:'ti-user',color:'#f4f4f4',tc:'#555',perms:['Calendar','Queue','Payroll (own)']}];
 const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const WDAYS_FULL={en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],th:['จ','อ','พ','พฤ','ศ','ส','อา']};
+const CLIENTS_DATA=[
+  {id:1,fname:'Vipha',lname:'Sukjai',dob:'1992-03-15',tel:'081-234-5678',email:'vipha.s@email.com'},
+  {id:2,fname:'Somying',lname:'Thani',dob:'1985-07-22',tel:'089-876-5432',email:'somying.t@email.com'},
+  {id:3,fname:'Nan',lname:'Pattana',dob:'1998-11-08',tel:'062-345-6789',email:'nan.p@email.com'},
+  {id:4,fname:'Porn',lname:'Srisawat',dob:'1990-01-30',tel:'095-111-2233',email:'porn.s@email.com'},
+  {id:5,fname:'Jira',lname:'Wongchai',dob:'1995-06-12',tel:'084-555-6677',email:'jira.w@email.com'},
+  {id:6,fname:'Manee',lname:'Prasert',dob:'1988-09-25',tel:'091-777-8899',email:'manee.p@email.com'},
+  {id:7,fname:'Wan',lname:'Dechakul',dob:'1993-04-18',tel:'098-333-4455',email:'wan.d@email.com'},
+  {id:8,fname:'Napa',lname:'Chaiyaporn',dob:'1991-12-03',tel:'086-222-3344',email:'napa.c@email.com'},
+];
+const CLIENT_HISTORY=[
+  {clientId:1,date:'2026-05-28',svc:'Spa Body Treatment',staff:'Noon',hasIntake:true},
+  {clientId:1,date:'2026-05-15',svc:'Oil Massage',staff:'Noon',hasIntake:true},
+  {clientId:1,date:'2026-04-20',svc:'Facial',staff:'Jane',hasIntake:false},
+  {clientId:2,date:'2026-05-30',svc:'Thai Massage',staff:'Pam',hasIntake:true},
+  {clientId:2,date:'2026-05-10',svc:'Thai Massage',staff:'Pam',hasIntake:true},
+  {clientId:3,date:'2026-05-30',svc:'Haircut',staff:'Min',hasIntake:false},
+  {clientId:4,date:'2026-05-30',svc:'Oil Massage',staff:'Jane',hasIntake:true},
+  {clientId:5,date:'2026-05-30',svc:'Facial',staff:'Pam',hasIntake:true},
+  {clientId:6,date:'2026-05-29',svc:'Couple Massage',staff:'Noon',hasIntake:true},
+  {clientId:7,date:'2026-05-31',svc:'Thai Massage',staff:'Pam',hasIntake:false},
+  {clientId:8,date:'2026-06-01',svc:'Spa',staff:'Noon',hasIntake:true},
+];
 const BOOKINGS=[
-  {h:9,m:0,dur:60,name:'Somying',svc:'Thai Massage',col:1,status:'done',req:false,addon:'Aroma',staff:'Pam',room:'Room 1',intime:'09:02',outtime:'10:05'},
-  {h:10,m:0,dur:90,name:'Vipha',svc:'Spa Body Treatment',col:2,status:'inservice',req:true,addon:'Scrub',staff:'Noon',room:'Room 2',intime:'10:00',outtime:''},
-  {h:10,m:30,dur:60,name:'Nan',svc:'Haircut',col:3,status:'inservice',req:false,addon:'',staff:'Min',room:'Room 3',intime:'10:32',outtime:''},
-  {h:11,m:0,dur:60,name:'Porn',svc:'Oil Massage',col:4,status:'confirm',req:true,addon:'',staff:'Jane',room:'VIP Room',intime:'',outtime:''},
-  {h:11,m:30,dur:60,name:'Jira',svc:'Facial',col:1,status:'confirm',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:''},
-  {h:13,m:0,dur:90,name:'Manee+',svc:'Couple Massage',col:2,status:'pending',req:false,addon:'Stones',staff:'',room:'Couple Room',intime:'',outtime:''},
-  {h:14,m:0,dur:60,name:'Wan',svc:'Thai Massage',col:3,status:'pending',req:false,addon:'',staff:'',room:'Room 1',intime:'',outtime:''},
-  {h:15,m:30,dur:90,name:'Napa',svc:'Spa',col:1,status:'pending',req:true,addon:'Mask',staff:'',room:'Room 2',intime:'',outtime:''},
-  {h:16,m:0,dur:60,name:'Ladda',svc:'Thai Massage',col:4,status:'pending',req:false,addon:'',staff:'',room:'VIP Room',intime:'',outtime:''},
-  {h:17,m:0,dur:60,name:'Supa',svc:'Facial',col:2,status:'pending',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:''},
+  {h:9,m:0,dur:60,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Thai Massage',col:1,status:'done',req:false,addon:'Aroma',staff:'Pam',room:'Room 1',intime:'09:02',outtime:'10:05',weekDay:2,notes:''},
+  {h:10,m:0,dur:90,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Spa Body Treatment',col:2,status:'inservice',req:true,addon:'Scrub',staff:'Noon',room:'Room 2',intime:'10:00',outtime:'',weekDay:3,notes:'Allergies: Lavender'},
+  {h:10,m:30,dur:60,fname:'Nan',lname:'Pattana',phone:'062-345-6789',clientId:3,name:'Nan',svc:'Haircut',col:3,status:'inservice',req:false,addon:'',staff:'Min',room:'Room 3',intime:'10:32',outtime:'',weekDay:3,notes:''},
+  {h:11,m:0,dur:60,fname:'Porn',lname:'Srisawat',phone:'095-111-2233',clientId:4,name:'Porn',svc:'Oil Massage',col:4,status:'confirm',req:true,addon:'',staff:'Jane',room:'VIP Room',intime:'',outtime:'',weekDay:3,notes:''},
+  {h:11,m:30,dur:60,fname:'Jira',lname:'Wongchai',phone:'084-555-6677',clientId:5,name:'Jira',svc:'Facial',col:1,status:'confirm',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:3,notes:''},
+  {h:13,m:0,dur:90,fname:'Manee',lname:'Prasert',phone:'091-777-8899',clientId:6,name:'Manee+',svc:'Couple Massage',col:2,status:'pending',req:false,addon:'Stones',staff:'',room:'Couple Room',intime:'',outtime:'',weekDay:4,notes:''},
+  {h:14,m:0,dur:60,fname:'Wan',lname:'Dechakul',phone:'098-333-4455',clientId:7,name:'Wan',svc:'Thai Massage',col:3,status:'pending',req:false,addon:'',staff:'',room:'Room 1',intime:'',outtime:'',weekDay:4,notes:''},
+  {h:15,m:30,dur:90,fname:'Napa',lname:'Chaiyaporn',phone:'086-222-3344',clientId:8,name:'Napa',svc:'Spa',col:1,status:'pending',req:true,addon:'Mask',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:16,m:0,dur:60,fname:'Ladda',lname:'Siri',phone:'081-999-0000',clientId:0,name:'Ladda',svc:'Thai Massage',col:4,status:'pending',req:false,addon:'',staff:'',room:'VIP Room',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:17,m:0,dur:60,fname:'Supa',lname:'Mee',phone:'082-888-7777',clientId:0,name:'Supa',svc:'Facial',col:2,status:'pending',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:5,notes:''},
+  {h:9,m:30,dur:60,fname:'Vipha',lname:'Sukjai',phone:'081-234-5678',clientId:1,name:'Vipha',svc:'Facial',col:1,status:'confirm',req:false,addon:'',staff:'Pam',room:'Room 1',intime:'',outtime:'',weekDay:1,notes:''},
+  {h:14,m:30,dur:90,fname:'Somying',lname:'Thani',phone:'089-876-5432',clientId:2,name:'Somying',svc:'Oil Massage',col:2,status:'pending',req:false,addon:'Aroma',staff:'',room:'Room 2',intime:'',outtime:'',weekDay:0,notes:''},
 ];
 const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
 
-let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month';
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selClientId=-1;
 function fmt12(h,m){const ap=h<12?'AM':'PM';const h12=h===0?12:h>12?h-12:h;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
 function minsToHM(mins){const h=Math.floor(mins/60),m=mins%60;return h&&m?`${h}h ${m}m`:h?`${h}h`:`${m}m`}
 function pad2(n){return String(n).padStart(2,'0')}
+function calcAge(dob){if(!dob)return'—';const b=new Date(dob),t=new Date();let a=t.getFullYear()-b.getFullYear();const m=t.getMonth()-b.getMonth();if(m<0||(m===0&&t.getDate()<b.getDate()))a--;return a+' yrs'}
+function fmtDateISO(d){return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`}
+function getWeekStart(){const d=getBkDate();const day=d.getDay();const diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d}
+function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';renderSch()}
+function bkBlockCls(b){return b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray'}
+function bkBlockHtml(b,idx,mode){
+  const cls=bkBlockCls(b),rowH=Math.round(b.dur/15)*36,endMins=b.h*60+b.m+b.dur;
+  const dragAttr=b.req?'':' draggable="true" ondragstart="onBkDragStart(event,'+idx+')" ondragend="onBkDragEnd(event)"';
+  const noDrag=b.req?' no-drag':'';
+  const btns=`<div class="bb-actions">
+    <span class="bb-btn" onclick="event.stopPropagation();openBkDetail(${idx})">${tr('detail')}</span>
+    <span class="bb-btn" onclick="event.stopPropagation();openBkIntake(${idx})">${tr('intake_form')}</span>
+    ${b.status==='inservice'?`<span class="bb-btn" onclick="event.stopPropagation();doCheckout(${idx})">${tr('checkout')}</span>`:''}
+  </div>`;
+  const blockCls=mode==='wk'?'wk-block':'bk-block';
+  return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" ${dragAttr}${mode==='wk'?` onclick="openBkDetail(${idx})"` :''}>
+    <div class="bb-name">${b.fname||b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
+    <div class="bb-meta">${b.svc}</div>
+    <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
+    ${b.addon?`<div class="bb-meta">+${b.addon}</div>`:''}
+    ${mode!=='wk'?btns:''}
+  </div>`;
+}
+function onBkDragStart(e,idx){if(BOOKINGS[idx].req){e.preventDefault();return}dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',idx)}
+function onBkDragEnd(e){e.target.classList.remove('dragging');dragBkIdx=-1;document.querySelectorAll('.tcell.drop-over').forEach(c=>c.classList.remove('drop-over'))}
+function onCellDragOver(e){if(dragBkIdx<0||BOOKINGS[dragBkIdx].req)return;e.preventDefault();e.currentTarget.classList.add('drop-over')}
+function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over')}
+function onCellDrop(e,col,h,m){e.preventDefault();e.currentTarget.classList.remove('drop-over');if(dragBkIdx<0)return;const b=BOOKINGS[dragBkIdx];if(b.req)return;b.col=col;b.h=h;b.m=m;if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;renderSch();renderBoard()}
+function openBkDetail(idx){
+  const b=BOOKINGS[idx],d=getBkDate();
+  document.getElementById('bd-fname').value=b.fname||b.name||'';
+  document.getElementById('bd-lname').value=b.lname||'';
+  document.getElementById('bd-phone').value=b.phone||'';
+  document.getElementById('bd-date').value=fmtDateISO(d);
+  document.getElementById('bd-time').value=`${pad2(b.h)}:${pad2(b.m)}`;
+  document.getElementById('bd-svc').value=b.svc||'';
+  document.getElementById('bd-dur').value=minsToHM(b.dur);
+  document.getElementById('bd-staff').value=b.req?(b.staff||'Requested'):(b.staff||tr('all_staff'));
+  document.getElementById('bd-addon').value=b.addon||'—';
+  document.getElementById('bd-notes').value=b.notes||'';
+  openModal('bkdetail');
+}
+function openBkIntake(idx){
+  const b=BOOKINGS[idx];
+  const title=document.querySelector('#modal-intake h3');
+  if(title)title.innerHTML=`${tr('intake_form')} — ${b.fname||b.name} ${b.lname||''}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;
+  openModal('intake');
+}
+function doCheckout(idx){
+  const b=BOOKINGS[idx];b.status='done';
+  const n=new Date();b.outtime=`${pad2(n.getHours())}:${pad2(n.getMinutes())}`;
+  renderSch();renderBoard();
+}
+function renderSch(){
+  if(bkView==='weekly'){renderSchWeekly();return}
+  const COLS=5,filter=document.getElementById('staff-filter')?.value||'';
+  let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
+  STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
+  html+='</div>';
+  for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
+    const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(${COLS},1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+    for(let c=1;c<=COLS;c++){
+      if(filter&&STAFF_DATA[c-1]?.name!==filter){html+=`<div class="tcell"></div>`;continue}
+      html+=`<div class="tcell" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
+      BOOKINGS.forEach((b,bi)=>{if(b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
+      html+='</div>';
+    }
+    html+='</div>';
+  }}
+  document.getElementById('sch-grid').innerHTML=html;
+  document.getElementById('sch-grid').className='sch-grid';
+  setTimeout(()=>{const w=document.querySelector('.sch-wrap');if(w){const fh=BOOKINGS.length?Math.min(...BOOKINGS.map(b=>b.h)):9;w.scrollTop=fh*4*36}},50);
+}
+function renderSchWeekly(){
+  const days=WDAYS_FULL[currentLang]||WDAYS_FULL.en,ws=getWeekStart(),mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  let html=`<div class="sch-head wk-grid" style="grid-template-columns:72px repeat(7,1fr)"><div class="sch-hcell">Time</div>`;
+  for(let i=0;i<7;i++){const dd=new Date(ws);dd.setDate(ws.getDate()+i);html+=`<div class="sch-hcell wk-hcell">${days[i]}<small>${dd.getDate()} ${mn[dd.getMonth()]}</small></div>`}
+  html+='</div>';
+  for(let h=9;h<21;h++){for(let m=0;m<60;m+=30){
+    const isH=m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(7,1fr);${isH?'border-top:0.5px solid #ddd':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+    for(let d=0;d<7;d++){
+      html+=`<div class="tcell">`;
+      BOOKINGS.forEach((b,bi)=>{if(b.weekDay===d&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'wk')});
+      html+='</div>';
+    }
+    html+='</div>';
+  }}
+  document.getElementById('sch-grid').innerHTML=html;
+  document.getElementById('sch-grid').className='sch-grid wk-grid';
+}
+function renderClients(){
+  const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
+  const rows=CLIENTS_DATA.filter(c=>!q||(`${c.fname} ${c.lname}`).toLowerCase().includes(q)||c.tel.includes(q));
+  document.getElementById('cl-body').innerHTML=rows.map(c=>`<tr>
+    <td><a class="cl-name-link" onclick="openClientModal(${c.id})">${c.fname} — ${c.lname}</a></td>
+    <td>${c.tel}</td>
+  </tr>`).join('');
+}
+function openClientModal(id){
+  selClientId=id;const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
+  document.getElementById('cl-modal-title').textContent=`${c.fname} ${c.lname}`;
+  document.getElementById('cl-info-grid').innerHTML=`
+    <div class="cl-info-item"><label>${tr('col_name')}</label><span>${c.fname} — ${c.lname}</span></div>
+    <div class="cl-info-item"><label>${tr('dob')}</label><span>${c.dob}</span></div>
+    <div class="cl-info-item"><label>${tr('col_tel')}</label><span>${c.tel}</span></div>
+    <div class="cl-info-item"><label>${tr('email')}</label><span>${c.email}</span></div>
+    <div class="cl-info-item"><label>${tr('age')}</label><span>${calcAge(c.dob)}</span></div>`;
+  const hist=[...CLIENT_HISTORY.filter(h=>h.clientId===id),...BOOKINGS.filter(b=>b.clientId===id).map(b=>({clientId:id,date:fmtDateISO(getBkDate()),svc:b.svc,staff:b.staff||'—',hasIntake:true,_live:true}))].sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('cl-history-list').innerHTML=hist.length?hist.map(h=>`<div class="cl-hist-item">
+    <span class="cl-hist-date">${h.date}</span><span class="cl-hist-svc">${h.svc}</span>
+    <span class="cl-hist-staff"><i class="ti ti-user" style="font-size:10px"></i> ${h.staff}</span>
+    ${h.hasIntake?`<span class="cl-hist-intake" onclick="openClientIntake(${id})">${tr('view_intake')}</span>`:''}
+  </div>`).join(''):`<div style="font-size:11px;color:var(--t2)">—</div>`;
+  openModal('client');
+}
+function openClientIntake(id){const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;const title=document.querySelector('#modal-intake h3');if(title)title.innerHTML=`${tr('intake_form')} — ${c.fname} ${c.lname}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;openModal('intake')}
+function clientAction(a){
+  const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
+  if(a==='edit'){document.getElementById('ec-fname').value=c.fname;document.getElementById('ec-lname').value=c.lname;document.getElementById('ec-dob').value=c.dob;document.getElementById('ec-tel').value=c.tel;document.getElementById('ec-email').value=c.email;closeModal('client');openModal('editclient')}
+  else if(a==='bookagain'){closeModal('client');showPage('booking');openModal('newbk')}
+  else if(a==='reschedule'){closeModal('client');showPage('booking');openModal('newbk')}
+}
+function saveEditClient(){
+  const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
+  c.fname=document.getElementById('ec-fname').value;c.lname=document.getElementById('ec-lname').value;
+  c.dob=document.getElementById('ec-dob').value;c.tel=document.getElementById('ec-tel').value;c.email=document.getElementById('ec-email').value;
+  closeModal('editclient');renderClients();openClientModal(selClientId);
+}
 
 function setRole(r){
   currentRole=r;
@@ -742,42 +1006,12 @@ function setRole(r){
   const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(r==='owner'||r==='manager')?'inline-flex':'none';
   renderBoard();renderPayroll();
 }
-function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on')}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on');if(id==='clients')renderClients()}
 function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on')}
 function openModal(id){document.getElementById('modal-'+id).classList.add('on')}
 function closeModal(id){document.getElementById('modal-'+id).classList.remove('on')}
 function chgDate(d){dateOffset+=d;updateDateLbl();renderSch();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
 function setMode(m,el){document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
-
-function renderSch(){
-  const COLS=5;
-  let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
-  STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
-  html+='</div>';
-  for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
-    const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
-    html+=`<div class="time-row" style="grid-template-columns:72px repeat(${COLS},1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
-    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
-    for(let c=1;c<=COLS;c++){
-      html+=`<div class="tcell">`;
-      BOOKINGS.filter(b=>b.col===c&&b.h===h&&b.m===m).forEach(b=>{
-        const cls=b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray';
-        const rowH=Math.round(b.dur/15)*36;const endMins=b.h*60+b.m+b.dur;
-        html+=`<div class="bk-block ${cls}" style="height:${rowH-4}px" onclick="openModal('intake')">
-          <div class="bb-name">${b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
-          <div class="bb-meta">${b.svc}</div>
-          <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
-          ${b.addon?`<div class="bb-meta">+${b.addon}</div>`:''}
-          <div style="display:flex;justify-content:flex-end;margin-top:1px"><span style="font-size:9px;padding:1px 5px;border:1px solid #ddd;border-radius:3px;cursor:pointer;background:#fff" onclick="event.stopPropagation();openModal('intake')">Detail</span></div>
-        </div>`;
-      });
-      html+='</div>';
-    }
-    html+='</div>';
-  }}
-  document.getElementById('sch-grid').innerHTML=html;
-  setTimeout(()=>{const w=document.querySelector('.sch-wrap');if(w){const fh=BOOKINGS.length?Math.min(...BOOKINGS.map(b=>b.h)):9;w.scrollTop=fh*4*36}},50);
-}
 
 let editRowIdx=-1;
 function openEditBoard(idx){editRowIdx=idx;const b=BOOKINGS[idx];document.getElementById('eb-name').textContent=`${b.name} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
@@ -923,7 +1157,7 @@ function doLogout() {
 }
 
 /* INIT */
-updateDateLbl();buildCalGrids();buildBkCal();renderSch();renderBoard();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();renderSch();renderBoard();renderClients();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 setInterval(updateClock,1000);applyLang();
 // Show login on load — don't call setRole, wait for login
 </script>
