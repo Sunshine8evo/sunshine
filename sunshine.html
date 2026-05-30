@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sunshine — Management System</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#e85d7a;--rose-l:#fdf0f3;--rose-d:#b8334f;
+  --amber:#d48b1a;--blue:#2271c3;--blue-l:#eaf3fc;--green:#2a8a52;
+  --r:6px;--rl:10px;
+  --bd:0.5px solid #e2e2e2;--bd2:0.5px solid #d0d0d0;
+  --sf:#ffffff;--sf2:#f8f8f8;--t:#1a1a1a;--t2:#666666;
+  --font-mono:monospace;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:var(--t);background:#fafafa}
+
+/* NAV */
+.nav{display:flex;align-items:center;border-bottom:var(--bd2);background:var(--sf);overflow-x:auto;gap:0;position:sticky;top:0;z-index:20;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.nav-logo{padding:12px 16px;font-weight:600;font-size:14px;color:var(--rose);display:flex;align-items:center;gap:6px;border-right:var(--bd2);white-space:nowrap;flex-shrink:0}
+.ntab{padding:11px 14px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px;transition:color .15s}
+.ntab:hover{color:var(--t)}.ntab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}.ntab i{font-size:14px}
+.nav-right{margin-left:auto;display:flex;align-items:center;border-left:var(--bd2)}
+.nav-icon-btn{padding:10px 12px;cursor:pointer;color:var(--t2);display:flex;align-items:center;gap:4px;font-size:12px;border-right:var(--bd2);transition:background .15s;white-space:nowrap;position:relative}
+.nav-icon-btn:hover{background:var(--sf2)}.nav-icon-btn i{font-size:14px}
+.lang-dropdown{position:absolute;top:100%;right:0;background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:300;min-width:160px;overflow:hidden;display:none;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+.lang-dropdown.on{display:block}
+.lang-item{padding:9px 14px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:background .15s}
+.lang-item:hover{background:var(--sf2)}.lang-item.on{color:var(--rose);font-weight:500}
+.lang-flag{font-size:16px}
+
+/* PAGES */
+.page{display:none;padding:16px;max-width:1400px;margin:0 auto}.page.on{display:block}
+
+/* BUTTONS */
+.btn{padding:7px 13px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:background .15s}
+.btn:hover{background:var(--sf2)}.btn-p{background:var(--rose);color:#fff;border-color:var(--rose)}.btn-p:hover{background:var(--rose-d)}.btn-sm{padding:4px 9px;font-size:11px}
+
+/* BADGES */
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.b-green{background:#eaf6ef;color:#185a32;border:0.5px solid #7dcda0}.b-gray{background:#f4f4f4;color:#555;border:0.5px solid #ccc}.b-blue{background:#eaf3fc;color:#0c447c;border:0.5px solid #a8c8f0}
+.b-role-owner{background:#fdf0f3;color:#8a1a30;border:0.5px solid var(--rose)}.b-role-mgr{background:#eaf3fc;color:#0c447c;border:0.5px solid #a8c8f0}.b-role-rec{background:#fdf6e7;color:#7d5a00;border:0.5px solid #f0c040}.b-role-staff{background:#f4f4f4;color:#555;border:0.5px solid #ccc}
+
+/* BOOKING PAGE */
+.bk-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.bk-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.date-nav{display:flex;align-items:center;gap:6px}
+.date-nav button{padding:4px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:12px}
+.date-cal-wrap{position:relative}
+.date-cal-btn{font-size:12px;font-weight:500;min-width:130px;text-align:center;cursor:pointer;padding:4px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:border-color .15s,background .15s}
+.date-cal-btn:hover{border-color:var(--rose);background:var(--rose-l)}
+.date-cal-popup{position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:250;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none;min-width:260px}
+.date-cal-popup.on{display:block}
+.date-cal-wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:4px 10px 0}
+.date-cal-wday{font-size:10px;color:var(--t2);text-align:center;font-weight:500;padding:2px 0}
+.date-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:8px 10px}
+.date-cal-day{padding:6px 2px;border-radius:var(--r);border:1px solid transparent;background:var(--sf);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;line-height:1.2}
+.date-cal-day:hover:not(.empty):not(.on){background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+.date-cal-day.on{background:var(--rose);color:#fff;border-color:var(--rose);font-weight:600}
+.date-cal-day.today:not(.on){border-color:var(--rose);color:var(--rose-d);font-weight:600}
+.date-cal-day.other{opacity:.4}
+.date-cal-day.empty{cursor:default;visibility:hidden}
+.sch-wrap{overflow-x:auto;overflow-y:auto;max-height:580px;border:var(--bd);border-radius:var(--rl)}
+.sch-grid{min-width:700px}
+.sch-head{display:grid;background:var(--sf2);border-bottom:var(--bd);position:sticky;top:0;z-index:10}
+.sch-hcell{padding:8px 10px;font-size:11px;color:var(--t2);font-weight:500;border-right:var(--bd);white-space:nowrap}
+.sch-hcell:last-child{border-right:none}
+.time-row{display:grid;border-bottom:0.5px solid #ececec}
+.time-lbl{padding:4px 8px;font-size:10px;color:var(--t2);border-right:var(--bd);display:flex;align-items:flex-start;padding-top:5px;white-space:nowrap;min-height:36px}
+.tcell{border-right:var(--bd);position:relative;min-height:36px}.tcell:last-child{border-right:none}
+.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:pointer;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s}
+.bk-block:hover{opacity:.82}
+.bb-yellow{background:#fef9e7;border-left-color:#d4a017;color:#7d5a00}.bb-blue{background:#eaf3fc;border-left-color:#2271c3;color:#0c447c}
+.bb-green{background:#eaf6ef;border-left-color:#2a8a52;color:#185a32}.bb-gray{background:#f4f4f4;border-left-color:#999;color:#555}
+.bb-name{font-weight:500;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bb-meta{font-size:9px;opacity:.85;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.req-icon{font-size:9px;color:#d48b1a}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
+.leg-dot{width:10px;height:10px;border-radius:2px}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:flex-start;justify-content:center;padding-top:40px}
+.modal-bg.on{display:flex}
+.modal{background:var(--sf);border-radius:var(--rl);padding:22px;width:480px;max-width:96%;border:var(--bd2);max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal h3{font-size:15px;font-weight:500;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.modal-close{cursor:pointer;color:var(--t2);font-size:18px}
+.fg{margin-bottom:11px}.fg label{display:block;font-size:11px;color:var(--t2);margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 10px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;font-family:inherit;outline:none;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--rose)}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.addon-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:4px}
+.addon-item{padding:5px 8px;border:var(--bd2);border-radius:var(--r);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .15s}
+.addon-item.on{border-color:var(--rose);background:var(--rose-l);color:var(--rose-d)}
+.intake-section{margin-bottom:14px;padding-bottom:14px;border-bottom:var(--bd)}.intake-section:last-child{border-bottom:none}
+.intake-section h4{font-size:12px;font-weight:500;margin-bottom:8px;color:var(--t2)}
+.intake-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:var(--bd);font-size:12px}.intake-row:last-child{border-bottom:none}
+.intake-val{font-weight:500;text-align:right;max-width:55%}
+
+/* BOARD */
+.board-wrap{border:var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--sf)}
+.board-head{background:var(--sf2);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:var(--bd)}
+.board-clock{font-size:22px;font-weight:500;font-family:var(--font-mono)}
+.mode-toggle{display:flex;border:var(--bd2);border-radius:var(--r);overflow:hidden}
+.mode-btn{padding:4px 12px;font-size:11px;cursor:pointer;background:var(--sf);color:var(--t2)}.mode-btn.on{background:var(--blue);color:#fff}
+.board-row{display:grid;gap:5px;padding:9px 14px;border-bottom:var(--bd);align-items:center;grid-template-columns:105px 115px 1fr 105px 80px 70px}
+.board-row:last-child{border-bottom:none}
+.board-row.s-inservice{background:#eaf6ef}.board-row.s-confirm{background:#eaf3fc}.board-row.s-done{opacity:.5}
+.brow-name{font-size:12px;font-weight:500}.brow-svc{font-size:10px;color:var(--t2);margin-top:2px}.brow-addon{font-size:10px;color:#d48b1a;margin-top:1px}
+.spill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.s-inservice .spill{background:#c6efd8;color:#185a32}.s-confirm .spill{background:#c8e2f7;color:#0c447c}.s-done .spill{background:#e8e8e8;color:#666}.sp-wait{background:#fef9e7;color:#7d5a00}
+.board-queue{border-top:var(--bd2);padding:12px 14px}
+.q-title{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.q-list{display:flex;flex-direction:column;gap:5px}
+.q-item{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--sf2);border-radius:var(--r);border:var(--bd)}
+.q-num{width:22px;height:22px;border-radius:50%;background:var(--blue-l);color:var(--blue);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.q-name{font-weight:500;font-size:12px;flex:1}.q-next{font-size:11px;color:var(--t2)}.q-time{font-size:11px;font-family:var(--font-mono);color:var(--amber)}
+
+/* SETTINGS */
+.set-layout{display:grid;grid-template-columns:180px 1fr;border:var(--bd);border-radius:var(--rl);overflow:hidden}
+.set-side{background:var(--sf2);border-right:var(--bd);padding:10px 0}
+.smenu{padding:9px 14px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:7px;border-left:2px solid transparent;transition:all .15s}
+.smenu:hover{color:var(--t);background:var(--sf)}.smenu.on{color:var(--rose);border-left-color:var(--rose);background:var(--rose-l)}.smenu i{font-size:14px}
+.set-body{padding:18px}
+.ssec{display:none}.ssec.on{display:block}
+.ssec h3{font-size:14px;font-weight:500;margin-bottom:14px;padding-bottom:10px;border-bottom:var(--bd)}
+.scard{background:var(--sf2);border-radius:var(--rl);padding:14px;margin-bottom:10px;border:var(--bd)}.scard h4{font-size:12px;font-weight:500;margin-bottom:10px}
+.role-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--sf);border:var(--bd);border-radius:var(--r);margin-bottom:6px}
+.role-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.svc-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-bottom:var(--bd);font-size:12px}.svc-item:last-child{border-bottom:none}
+.svc-name{flex:1;font-weight:500}.svc-price{color:var(--rose);font-weight:500}.svc-dur{color:var(--t2);font-size:11px}
+.wday-chip{padding:4px 9px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t2);font-size:11px;cursor:pointer;transition:all .15s}
+.wday-chip.on{background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+
+/* PAYROLL */
+.pr-period-tabs{display:flex;gap:0;border-bottom:var(--bd);margin-bottom:10px}
+.prtab{padding:7px 14px;font-size:12px;color:var(--t2);cursor:pointer;border-bottom:2px solid transparent}.prtab.on{color:var(--rose);border-bottom-color:var(--rose);font-weight:500}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px}
+.mc{background:var(--sf2);border-radius:var(--r);padding:14px;border:var(--bd)}.mc-lbl{font-size:10px;color:var(--t2);margin-bottom:5px}.mc-val{font-size:22px;font-weight:500}.mc-sub{font-size:10px;color:var(--t2);margin-top:3px}.mc-up{color:#2a8a52}
+.pr-table{width:100%;border-collapse:collapse;font-size:12px}
+.pr-table th{text-align:left;padding:8px 10px;font-size:10px;color:var(--t2);font-weight:500;background:var(--sf2);border-bottom:var(--bd);white-space:nowrap}
+.pr-table td{padding:9px 10px;border-bottom:var(--bd);vertical-align:middle}.pr-table tbody tr:last-child td{border-bottom:none}.pr-table tbody tr:hover td{background:var(--sf2)}
+.pr-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.bar-wrap{background:var(--sf2);border-radius:3px;height:5px;width:80px;overflow:hidden;margin-top:4px}.bar-fill{height:5px;border-radius:3px;background:var(--rose)}
+.pay-paid{background:#eaf6ef;color:#185a32;padding:2px 8px;border-radius:10px;font-size:10px}.pay-pend{background:#fdf6e7;color:#7d5a00;padding:2px 8px;border-radius:10px;font-size:10px}
+
+/* CALENDAR PICKER */
+.cal-picker-wrap{position:relative;display:inline-block}
+.cal-picker-btn{padding:7px 12px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-width:180px;transition:border-color .15s}
+.cal-picker-btn:hover{border-color:var(--rose)}
+.cal-picker-popup{position:absolute;top:calc(100% + 4px);left:0;background:var(--sf);border:var(--bd2);border-radius:var(--rl);z-index:250;box-shadow:0 6px 20px rgba(0,0,0,.12);display:none;min-width:280px}
+.cal-picker-popup.on{display:block}
+.cal-popup-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 8px;border-bottom:var(--bd)}
+.cal-popup-nav button{padding:4px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:12px;color:var(--t2)}
+.cal-popup-nav button:hover{background:var(--sf2)}
+.cal-month-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:10px}
+.cal-month-btn{padding:7px 4px;border-radius:var(--r);border:var(--bd);background:var(--sf);cursor:pointer;font-size:11px;text-align:center;transition:all .15s;color:var(--t)}
+.cal-month-btn:hover{background:var(--rose-l);color:var(--rose-d);border-color:var(--rose)}
+.cal-month-btn.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.cal-year-display{font-size:13px;font-weight:600}
+.cal-popup-footer{padding:8px 14px;border-top:var(--bd);display:flex;justify-content:flex-end;gap:6px}
+
+/* SALES */
+.sum-card{background:var(--sf2);border-radius:var(--r);padding:14px;border:var(--bd)}.sum-lbl{font-size:10px;color:var(--t2);margin-bottom:5px}.sum-val{font-size:22px;font-weight:500}.sum-sub{font-size:10px;margin-top:3px}
+.bar-chart{display:flex;gap:3px;align-items:flex-end;height:80px;margin-top:8px}
+.bcol{flex:1;border-radius:3px 3px 0 0;background:var(--rose-l);cursor:pointer;transition:background .15s;min-width:18px}.bcol:hover{background:#f4a8bb}.bcol.hi{background:var(--rose)}
+.bcol-lbl{font-size:9px;color:var(--t2);text-align:center;margin-top:2px}
+.top-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--sf);border:var(--bd);border-radius:var(--r);font-size:12px;margin-bottom:4px}
+.top-rank{width:20px;height:20px;border-radius:50%;background:var(--rose-l);color:var(--rose-d);font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:500;flex-shrink:0}
+.top-name{flex:1;font-weight:500}.top-val{color:var(--rose);font-weight:500}
+.tgl{width:34px;height:18px;background:#ccc;border-radius:9px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tgl.on{background:var(--rose)}.tgl::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}.tgl.on::after{transform:translateX(16px)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:linear-gradient(135deg,#fdf0f3 0%,#fff5f7 50%,#fce4ec 100%);z-index:1000;display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:40px;width:380px;max-width:92vw;box-shadow:0 8px 40px rgba(232,93,122,.15);border:0.5px solid #f5c6d0">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:28px;margin-bottom:6px">☀️</div>
+      <div style="font-size:22px;font-weight:700;color:#e85d7a">Sunshine</div>
+      <div style="font-size:12px;color:#999;margin-top:4px">Spa & Wellness Management</div>
+    </div>
+    <div id="login-error" style="display:none;background:#fef2f2;color:#b91c1c;padding:10px 12px;border-radius:8px;font-size:12px;margin-bottom:14px;border:0.5px solid #fecaca"></div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:5px;font-weight:500">Username</label>
+      <input id="login-user" type="text" placeholder="Enter username" style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid #ddd;font-size:13px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor=&apos;#e85d7a&apos;" onblur="this.style.borderColor=&apos;#ddd&apos;" onkeydown="if(event.key===&apos;Enter&apos;)doLogin()">
+    </div>
+    <div style="margin-bottom:22px">
+      <label style="display:block;font-size:11px;color:#666;margin-bottom:5px;font-weight:500">Password</label>
+      <input id="login-pass" type="password" placeholder="Enter password" style="width:100%;padding:10px 12px;border-radius:8px;border:0.5px solid #ddd;font-size:13px;outline:none;transition:border-color .15s" onfocus="this.style.borderColor=&apos;#e85d7a&apos;" onblur="this.style.borderColor=&apos;#ddd&apos;" onkeydown="if(event.key===&apos;Enter&apos;)doLogin()">
+    </div>
+    <button onclick="doLogin()" style="width:100%;padding:12px;background:#e85d7a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;transition:background .15s" onmouseover="this.style.background=&apos;#b8334f&apos;" onmouseout="this.style.background=&apos;#e85d7a&apos;">Sign In</button>
+    <div style="margin-top:20px;background:#f8f8f8;border-radius:8px;padding:12px;font-size:11px;color:#888">
+      <div style="font-weight:500;margin-bottom:6px;color:#555">Demo Accounts:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+        <span>owner / owner123</span><span style="color:#e85d7a">→ Owner</span>
+        <span>manager / mgr123</span><span style="color:#2271c3">→ Manager</span>
+        <span>reception / rec123</span><span style="color:#d48b1a">→ Reception</span>
+        <span>staff / staff123</span><span style="color:#666">→ Staff</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo"><i class="ti ti-spa"></i>Sunshine</div>
+  <div class="ntab on" onclick="showPage('booking')" id="tab-booking" data-roles="owner,manager,reception,staff"><i class="ti ti-calendar"></i><span class="t" data-k="nav_booking">Booking</span></div>
+  <div class="ntab" onclick="showPage('display')" id="tab-display" data-roles="owner,manager,reception,staff"><i class="ti ti-layout-board"></i><span class="t" data-k="nav_display">Queue Display</span></div>
+  <div class="ntab" onclick="showPage('settings')" id="tab-settings" data-roles="owner,manager"><i class="ti ti-settings"></i><span class="t" data-k="nav_settings">Settings</span></div>
+  <div class="ntab" onclick="showPage('payroll')" id="tab-payroll" data-roles="owner,manager,staff"><i class="ti ti-cash"></i><span class="t" data-k="nav_payroll">Payroll</span></div>
+  <div class="ntab" onclick="showPage('sales')" id="tab-sales" data-roles="owner,manager,reception"><i class="ti ti-chart-bar"></i><span class="t" data-k="nav_sales">Sales Summary</span></div>
+  <div class="nav-right">
+    <div class="nav-icon-btn" id="lang-btn" onclick="toggleLang()">
+      <i class="ti ti-language"></i>
+      <span id="cur-lang-label">🇺🇸 EN</span>
+      <i class="ti ti-chevron-down" style="font-size:10px"></i>
+      <div class="lang-dropdown" id="lang-menu">
+        <div class="lang-item on" onclick="setLang('en');event.stopPropagation()"><span class="lang-flag">🇺🇸</span>English</div>
+        <div class="lang-item" onclick="setLang('th');event.stopPropagation()"><span class="lang-flag">🇹🇭</span>ภาษาไทย</div>
+        <div class="lang-item" onclick="setLang('zh');event.stopPropagation()"><span class="lang-flag">🇨🇳</span>中文</div>
+        <div class="lang-item" onclick="setLang('es');event.stopPropagation()"><span class="lang-flag">🇪🇸</span>Español</div>
+        <div class="lang-item" onclick="setLang('ja');event.stopPropagation()"><span class="lang-flag">🇯🇵</span>日本語</div>
+        <div class="lang-item" onclick="setLang('ko');event.stopPropagation()"><span class="lang-flag">🇰🇷</span>한국어</div>
+      </div>
+    </div>
+    <div class="nav-icon-btn" id="nav-user-info" style="gap:6px;padding:8px 12px">
+      <span id="nav-avatar" style="width:24px;height:24px;border-radius:50%;background:#fdf0f3;color:#8a1a30;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">O</span>
+      <div style="display:flex;flex-direction:column;line-height:1.3">
+        <span id="nav-username" style="font-size:11px;font-weight:500;color:var(--t)">Owner</span>
+        <span id="nav-role-label" style="font-size:10px;color:var(--t2)">Owner</span>
+      </div>
+    </div>
+    <div class="nav-icon-btn" onclick="doLogout()"><i class="ti ti-logout"></i><span class="t" data-k="logout">Logout</span></div>
+  </div>
+</nav>
+
+<!-- ===== BOOKING PAGE ===== -->
+<div id="page-booking" class="page on">
+  <div class="bk-toolbar">
+    <div class="bk-left">
+      <div class="date-nav">
+        <button onclick="chgDate(-1)"><i class="ti ti-chevron-left"></i></button>
+        <div class="date-cal-wrap">
+          <div class="date-cal-btn" id="date-lbl" onclick="toggleBkCal(event)"><i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i><span id="date-lbl-text">Today</span></div>
+          <div class="date-cal-popup" id="bk-cal-popup">
+            <div class="cal-popup-head">
+              <div class="cal-popup-nav"><button type="button" onclick="shiftBkCalMonth(-1)"><i class="ti ti-chevron-left"></i></button></div>
+              <span class="cal-year-display" id="bk-cal-title"></span>
+              <div class="cal-popup-nav"><button type="button" onclick="shiftBkCalMonth(1)"><i class="ti ti-chevron-right"></i></button></div>
+            </div>
+            <div class="date-cal-wdays" id="bk-cal-wdays"></div>
+            <div class="date-cal-grid" id="bk-cal-grid"></div>
+            <div class="cal-popup-footer">
+              <button type="button" class="btn btn-sm" onclick="goBkToday()"><span class="t" data-k="today">Today</span></button>
+              <button type="button" class="btn btn-sm" onclick="closeBkCal()">OK</button>
+            </div>
+          </div>
+        </div>
+        <button onclick="chgDate(1)"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <select id="staff-filter" onchange="renderSch()" style="padding:5px 8px;border-radius:var(--r);border:var(--bd2);background:var(--sf);color:var(--t);font-size:12px">
+        <option value="">All Staff</option>
+        <option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option>
+      </select>
+    </div>
+    <div id="bk-new-btn">
+      <button class="btn btn-p" onclick="openModal('newbk')"><i class="ti ti-plus"></i><span class="t" data-k="new_booking">New Booking</span></button>
+    </div>
+  </div>
+  <div style="display:flex;gap:0;border-bottom:var(--bd);margin-bottom:12px">
+    <div style="padding:6px 12px;font-size:12px;color:var(--rose);border-bottom:2px solid var(--rose);font-weight:500;cursor:pointer" class="t" data-k="daily">Daily</div>
+    <div style="padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer" class="t" data-k="weekly">Weekly</div>
+    <div style="padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer" class="t" data-k="monthly">Monthly</div>
+  </div>
+  <div class="sch-wrap"><div class="sch-grid" id="sch-grid"></div></div>
+  <div class="legend">
+    <div class="leg-item"><div class="leg-dot" style="background:#d4a017"></div><span class="t" data-k="pending">Pending</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2271c3"></div><span class="t" data-k="confirmed">Confirmed</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#2a8a52"></div><span class="t" data-k="in_service">In Service</span></div>
+    <div class="leg-item"><div class="leg-dot" style="background:#999"></div><span class="t" data-k="completed">Completed</span></div>
+    <div class="leg-item"><i class="ti ti-star" style="font-size:11px;color:#d48b1a"></i><span class="t" data-k="staff_request">Staff Request</span></div>
+  </div>
+</div>
+
+<!-- ===== QUEUE DISPLAY PAGE ===== -->
+<div id="page-display" class="page">
+  <div class="board-wrap">
+    <div class="board-head">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px">
+          <i class="ti ti-activity" style="font-size:14px;color:var(--blue)"></i>
+          <span class="t" data-k="queue_today">Today's Queue</span>
+        </div>
+        <div id="mode-wrap" style="display:none">
+          <div class="mode-toggle">
+            <div class="mode-btn on" onclick="setMode('manual',this)">Manual</div>
+            <div class="mode-btn" onclick="setMode('auto',this)">Auto</div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div class="board-clock" id="b-clock">00:00</div>
+        <div style="font-size:11px;color:var(--t2)" id="b-date"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:105px 115px 1fr 105px 80px 70px;gap:5px;padding:7px 14px;background:var(--sf2);border-bottom:var(--bd);font-size:10px;color:var(--t2);font-weight:500">
+      <div class="t" data-k="col_time">Booking / Dur.</div>
+      <div class="t" data-k="col_inout">In — Out</div>
+      <div class="t" data-k="col_guest">Guest / Service</div>
+      <div class="t" data-k="col_staff">Staff</div>
+      <div class="t" data-k="col_room">Room</div>
+      <div></div>
+    </div>
+    <div id="board-rows"></div>
+    <div class="board-queue">
+      <div class="q-title"><i class="ti ti-users" style="font-size:12px"></i><span class="t" data-k="next_queue">Next Up</span></div>
+      <div class="q-list" id="q-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS PAGE ===== -->
+<div id="page-settings" class="page">
+  <div class="set-layout">
+    <div class="set-side">
+      <div class="smenu on" onclick="showSet('staff')" id="sm-staff"><i class="ti ti-users"></i><span class="t" data-k="menu_staff">Staff</span></div>
+      <div class="smenu" onclick="showSet('services')" id="sm-services"><i class="ti ti-sparkles"></i><span class="t" data-k="menu_services">Services</span></div>
+      <div class="smenu" onclick="showSet('addons')" id="sm-addons"><i class="ti ti-plus-circle"></i>Add-on</div>
+      <div class="smenu" onclick="showSet('rooms')" id="sm-rooms"><i class="ti ti-door"></i><span class="t" data-k="menu_rooms">Rooms</span></div>
+      <div class="smenu" onclick="showSet('hours')" id="sm-hours"><i class="ti ti-clock"></i><span class="t" data-k="menu_hours">Hours</span></div>
+      <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i>Intake Form</div>
+      <div class="smenu" onclick="showSet('roles')" id="sm-roles"><i class="ti ti-shield-check"></i><span class="t" data-k="menu_roles">Roles</span></div>
+      <div class="smenu" onclick="showSet('notify')" id="sm-notify"><i class="ti ti-bell"></i><span class="t" data-k="menu_notify">Notifications</span></div>
+      <div class="smenu" onclick="showSet('shop')" id="sm-shop"><i class="ti ti-building-store"></i><span class="t" data-k="menu_shop">Shop Info</span></div>
+    </div>
+    <div class="set-body">
+      <div class="ssec on" id="sec-staff">
+        <h3 class="t" data-k="manage_staff">Manage Staff</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addstaff')"><i class="ti ti-plus"></i><span class="t" data-k="add_staff">Add Staff</span></button>
+        </div>
+        <div id="staff-cards"></div>
+      </div>
+      <div class="ssec" id="sec-services">
+        <h3 class="t" data-k="main_services">Main Services</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addsvc')"><i class="ti ti-plus"></i><span class="t" data-k="add_service">Add Service</span></button>
+        </div>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="svc-list"></div>
+      </div>
+      <div class="ssec" id="sec-addons">
+        <h3>Add-on</h3>
+        <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+          <button class="btn btn-p btn-sm" onclick="openModal('addaddon')"><i class="ti ti-plus"></i>Add Add-on</button>
+        </div>
+        <div style="border:var(--bd);border-radius:var(--rl);overflow:hidden" id="addon-list"></div>
+      </div>
+      <div class="ssec" id="sec-rooms"><h3 class="t" data-k="rooms">Rooms</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div></div>
+      <div class="ssec" id="sec-hours"><h3 class="t" data-k="business_hours">Business Hours</h3><div class="scard"><div id="hours-rows"></div></div></div>
+      <div class="ssec" id="sec-intake">
+        <h3>Intake Form</h3>
+        <div class="scard"><h4>Standard Fields</h4><div id="intake-fields"></div></div>
+        <div class="scard" style="margin-top:8px"><h4>Custom Field</h4>
+          <div class="fg-row" style="margin-bottom:8px">
+            <div class="fg"><label>Field Name</label><input type="text" placeholder="e.g. Medical conditions"></div>
+            <div class="fg"><label>Type</label><select><option>Text</option><option>Choice</option><option>Yes/No</option></select></div>
+          </div>
+          <button class="btn btn-p btn-sm"><i class="ti ti-plus"></i>Add Field</button>
+        </div>
+      </div>
+      <div class="ssec" id="sec-roles"><h3 class="t" data-k="roles">Roles</h3><div id="roles-list"></div></div>
+      <div class="ssec" id="sec-notify">
+        <h3 class="t" data-k="notifications">Notifications</h3>
+        <div class="scard">
+          <div style="display:grid;gap:8px;font-size:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd)"><span>SMS Booking Confirmation</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd)"><span>Reminder 24h before</span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0"><span>Post-service Review</span><div class="tgl" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="ssec" id="sec-shop">
+        <h3 class="t" data-k="shop_info">Shop Information</h3>
+        <div class="scard">
+          <div class="fg"><label>Shop Name</label><input type="text" value="Sunshine & Wellness"></div>
+          <div class="fg-row"><div class="fg"><label>Phone</label><input type="text" value="02-123-4567"></div><div class="fg"><label>Line ID</label><input type="text" value="@sunshine"></div></div>
+          <button class="btn btn-p btn-sm">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAYROLL PAGE ===== -->
+<div id="page-payroll" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_payroll">Payroll</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-sm"><i class="ti ti-download"></i>Export</button>
+      <button class="btn btn-p btn-sm" id="pay-btn"><i class="ti ti-send"></i><span class="t" data-k="pay_salary">Pay Salary</span></button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:var(--bd)">
+    <span style="font-size:11px;color:var(--t2)" class="t" data-k="period">Period:</span>
+    <div class="cal-picker-wrap" id="pr-cal-wrap">
+      <div class="cal-picker-btn" onclick="toggleCalPicker('pr')">
+        <i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i>
+        <span id="pr-cal-label">May 2026</span>
+        <i class="ti ti-chevron-down" style="font-size:10px;margin-left:auto"></i>
+      </div>
+      <div class="cal-picker-popup" id="pr-cal-popup">
+        <div class="cal-popup-head">
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('pr',-1)"><i class="ti ti-chevron-left"></i></button></div>
+          <span class="cal-year-display" id="pr-cal-year">2026</span>
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('pr',1)"><i class="ti ti-chevron-right"></i></button></div>
+        </div>
+        <div class="cal-month-grid" id="pr-month-grid"></div>
+        <div class="cal-popup-footer">
+          <button class="btn btn-sm" onclick="closeCalPicker('pr')">Cancel</button>
+          <button class="btn btn-p btn-sm" onclick="applyCalPicker('pr')"><i class="ti ti-check"></i>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pr-period-tabs">
+    <div class="prtab on" onclick="setPrPeriod('day',this)"><span class="t" data-k="daily">Daily</span></div>
+    <div class="prtab" onclick="setPrPeriod('week',this)"><span class="t" data-k="weekly">Weekly</span></div>
+    <div class="prtab" onclick="setPrPeriod('month',this)"><span class="t" data-k="monthly">Monthly</span></div>
+    <div class="prtab" onclick="setPrPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
+  </div>
+  <div id="pr-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
+  <div class="metric-grid" id="pr-metrics"></div>
+  <div style="overflow-x:auto;border:var(--bd);border-radius:var(--rl)">
+    <table class="pr-table"><thead><tr id="pr-thead"></tr></thead><tbody id="pr-body"></tbody></table>
+  </div>
+</div>
+
+<!-- ===== SALES PAGE ===== -->
+<div id="page-sales" class="page">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+    <div style="font-size:18px;font-weight:500" class="t" data-k="nav_sales">Sales Summary</div>
+    <button class="btn btn-sm"><i class="ti ti-download"></i>Export</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--sf2);border-radius:var(--r);border:var(--bd)">
+    <span style="font-size:11px;color:var(--t2)" class="t" data-k="period">Period:</span>
+    <div class="cal-picker-wrap" id="sl-cal-wrap">
+      <div class="cal-picker-btn" onclick="toggleCalPicker('sl')">
+        <i class="ti ti-calendar" style="font-size:13px;color:var(--rose)"></i>
+        <span id="sl-cal-label">May 2026</span>
+        <i class="ti ti-chevron-down" style="font-size:10px;margin-left:auto"></i>
+      </div>
+      <div class="cal-picker-popup" id="sl-cal-popup">
+        <div class="cal-popup-head">
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('sl',-1)"><i class="ti ti-chevron-left"></i></button></div>
+          <span class="cal-year-display" id="sl-cal-year">2026</span>
+          <div class="cal-popup-nav"><button onclick="shiftCalYear('sl',1)"><i class="ti ti-chevron-right"></i></button></div>
+        </div>
+        <div class="cal-month-grid" id="sl-month-grid"></div>
+        <div class="cal-popup-footer">
+          <button class="btn btn-sm" onclick="closeCalPicker('sl')">Cancel</button>
+          <button class="btn btn-p btn-sm" onclick="applyCalPicker('sl')"><i class="ti ti-check"></i>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pr-period-tabs">
+    <div class="prtab on" onclick="setSlPeriod('day',this)"><span class="t" data-k="daily">Daily</span></div>
+    <div class="prtab" onclick="setSlPeriod('week',this)"><span class="t" data-k="weekly">Weekly</span></div>
+    <div class="prtab" onclick="setSlPeriod('month',this)"><span class="t" data-k="monthly">Monthly</span></div>
+    <div class="prtab" onclick="setSlPeriod('year',this)"><span class="t" data-k="yearly">Yearly</span></div>
+  </div>
+  <div id="sl-period-lbl" style="font-size:11px;color:var(--t2);margin-bottom:10px"></div>
+  <div id="sales-metrics" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px"></div>
+  <div class="scard" style="margin-bottom:12px">
+    <div style="font-size:12px;font-weight:500;margin-bottom:6px" id="sl-chart-title">Daily Revenue</div>
+    <div class="bar-chart" id="sales-bar"></div>
+    <div style="display:flex;gap:3px" id="sales-bar-lbl"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px" class="t" data-k="main_services">Main Services</div>
+      <div id="top-main-svc"></div>
+      <div style="font-size:12px;font-weight:500;margin:12px 0 8px">Add-on</div>
+      <div id="top-addon-svc"></div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:500;margin-bottom:8px" class="t" data-k="staff_cost">Staff Costs</div>
+      <div id="staff-cost-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div id="modal-newbk" class="modal-bg">
+  <div class="modal">
+    <h3><span class="t" data-k="new_booking">New Booking</span><span class="modal-close" onclick="closeModal('newbk')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>Guest Name</label><input type="text" placeholder="Guest name"></div><div class="fg"><label>Phone</label><input type="tel" placeholder="08X-XXX"></div></div>
+    <div class="fg-row"><div class="fg"><label>Date</label><input type="date"></div><div class="fg"><label>Time</label><input type="time" value="10:00"></div></div>
+    <div class="fg"><label>Main Service</label><select><option>Thai Massage 60 min — ฿500</option><option>Oil Massage 90 min — ฿800</option><option>Spa Body Treatment — ฿1,200</option><option>Facial — ฿900</option><option>Couple Massage 90 min — ฿1,600</option></select></div>
+    <div class="fg-row"><div class="fg"><label>Duration</label><select><option>60 min</option><option>90 min</option><option>120 min</option></select></div><div class="fg"><label>Staff Request</label><select><option>-- No preference --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select></div></div>
+    <div class="fg"><label>Add-on</label><div class="addon-grid" id="modal-addon"></div></div>
+    <div class="fg-row"><div class="fg"><label>Room</label><select><option>-- Any --</option><option>Room 1</option><option>Room 2</option><option>VIP Room</option><option>Couple Room</option></select></div><div class="fg"><label>Notes</label><input type="text" placeholder="Allergies, preferences..."></div></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('newbk')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('newbk')"><i class="ti ti-check"></i>Save Booking</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-intake" class="modal-bg">
+  <div class="modal">
+    <h3>Intake Form — Vipha<span class="modal-close" onclick="closeModal('intake')">&times;</span></h3>
+    <div class="intake-section"><h4>General Info</h4>
+      <div class="intake-row"><span>Name</span><span class="intake-val">Vipha Sukjai</span></div>
+      <div class="intake-row"><span>Age</span><span class="intake-val">34 yrs</span></div>
+      <div class="intake-row"><span>Phone</span><span class="intake-val">081-234-5678</span></div>
+    </div>
+    <div class="intake-section"><h4>Health</h4>
+      <div class="intake-row"><span>Medical Conditions</span><span class="intake-val">Low blood pressure</span></div>
+      <div class="intake-row"><span>Allergies</span><span class="intake-val">Lavender oil</span></div>
+      <div class="intake-row"><span>Pregnant</span><span class="intake-val">No</span></div>
+    </div>
+    <div class="intake-section"><h4>Preferences</h4>
+      <div class="intake-row"><span>Pressure</span><span class="intake-val">Medium</span></div>
+      <div class="intake-row"><span>Focus Areas</span><span class="intake-val">Back, Shoulders</span></div>
+    </div>
+    <button class="btn btn-sm" onclick="closeModal('intake')"><i class="ti ti-printer"></i>Print</button>
+  </div>
+</div>
+
+<div id="modal-addstaff" class="modal-bg">
+  <div class="modal">
+    <h3>Add Staff<span class="modal-close" onclick="closeModal('addstaff')">&times;</span></h3>
+    <div class="fg-row"><div class="fg"><label>First Name</label><input type="text" placeholder="First name"></div><div class="fg"><label>Last Name</label><input type="text" placeholder="Last name"></div></div>
+    <div class="fg"><label>Service Name (shown to guests)</label><input type="text" placeholder="Nickname / display name"></div>
+    <div class="fg-row"><div class="fg"><label>Position</label><input type="text" placeholder="e.g. Massage Therapist"></div><div class="fg"><label>Role</label><select><option>staff</option><option>reception</option><option>manager</option></select></div></div>
+    <div class="fg"><label>Work Days</label><div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px" id="wday-sel"></div></div>
+    <div class="fg"><label>Work Hours</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--amber);margin-bottom:6px"><i class="ti ti-sun"></i> AM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="09:00"></div><div class="fg"><label>To</label><input type="time" value="13:00"></div></div></div>
+        <div style="border:var(--bd2);border-radius:var(--r);padding:10px"><div style="font-size:11px;font-weight:500;color:var(--blue);margin-bottom:6px"><i class="ti ti-moon"></i> PM</div><div class="fg-row"><div class="fg"><label>From</label><input type="time" value="13:00"></div><div class="fg"><label>To</label><input type="time" value="21:00"></div></div></div>
+      </div>
+    </div>
+    <div class="fg-row"><div class="fg"><label>Hourly Rate (฿)</label><input type="number" placeholder="0"></div><div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addstaff')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addstaff')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addsvc" class="modal-bg">
+  <div class="modal">
+    <h3>Add Service<span class="modal-close" onclick="closeModal('addsvc')">&times;</span></h3>
+    <div class="fg"><label>Service Name</label><input type="text" placeholder="e.g. Aromatherapy Massage"></div>
+    <div class="fg-row"><div class="fg"><label>Price (฿)</label><input type="number" placeholder="0"></div><div class="fg"><label>Duration (min)</label><input type="number" placeholder="60"></div></div>
+    <div class="fg"><label>Type</label>
+      <div style="display:flex;gap:12px;margin-top:4px">
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype" checked> Solo (1 therapist)</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="svctype"> Couple (2 therapists)</label>
+      </div>
+    </div>
+    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="20"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addsvc')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addsvc')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-addaddon" class="modal-bg">
+  <div class="modal">
+    <h3>Add Add-on<span class="modal-close" onclick="closeModal('addaddon')">&times;</span></h3>
+    <div class="fg"><label>Add-on Name</label><input type="text" placeholder="e.g. Hot Stones"></div>
+    <div class="fg"><label>Price (฿)</label><input type="number" placeholder="0"></div>
+    <div class="fg"><label>Commission (%)</label><input type="number" placeholder="0"></div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('addaddon')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="closeModal('addaddon')"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-editboard" class="modal-bg">
+  <div class="modal">
+    <h3>Edit Queue Entry<span class="modal-close" onclick="closeModal('editboard')">&times;</span></h3>
+    <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:var(--t2)" id="eb-name"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Check-in Time</label><input type="time" id="eb-in"></div>
+      <div class="fg"><label>Check-out Time</label><input type="time" id="eb-out"></div>
+    </div>
+    <div class="fg"><label>Assigned Staff</label>
+      <select id="eb-staff"><option value="">-- Select Staff --</option><option>Pam</option><option>Noon</option><option>Min</option><option>Jane</option><option>Bo</option></select>
+    </div>
+    <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-sm" onclick="closeModal('editboard')">Cancel</button>
+      <button class="btn btn-p btn-sm" onclick="saveEditBoard()"><i class="ti ti-check"></i>Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================== TRANSLATIONS ==================== */
+const LANGS={
+  en:{nav_booking:'Booking',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave'},
+  th:{nav_booking:'จองออนไลน์',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด'},
+  zh:{nav_booking:'在线预约',nav_display:'排队显示',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假'},
+  es:{nav_booking:'Reservas',nav_display:'Cola',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja'},
+  ja:{nav_booking:'予約',nav_display:'待ち行列',nav_settings:'設定',nav_payroll:'給与',nav_sales:'売上概要',logout:'ログアウト',new_booking:'新規予約',all_staff:'全スタッフ',daily:'日次',weekly:'週次',monthly:'月次',yearly:'年次',today:'今日',pending:'保留中',confirmed:'確認済',in_service:'施術中',completed:'完了',staff_request:'スタッフ指名',queue_today:'本日の予約',col_time:'予約/時間',col_inout:'入室 — 退室',col_guest:'顧客/サービス',col_staff:'スタッフ',col_room:'部屋',next_queue:'次の顧客',menu_staff:'スタッフ',menu_services:'サービス',menu_rooms:'部屋',menu_hours:'営業時間',menu_roles:'役割',menu_notify:'通知',menu_shop:'店舗情報',manage_staff:'スタッフ管理',add_staff:'スタッフ追加',main_services:'主要サービス',add_service:'サービス追加',rooms:'部屋',business_hours:'営業時間',roles:'役割設定',notifications:'通知設定',shop_info:'店舗情報',period:'期間:',pay_salary:'給与支払',staff_cost:'人件費',ready:'勤務中',on_leave:'休暇中'},
+  ko:{nav_booking:'예약',nav_display:'대기 현황',nav_settings:'설정',nav_payroll:'급여',nav_sales:'매출 요약',logout:'로그아웃',new_booking:'새 예약',all_staff:'전체 직원',daily:'일별',weekly:'주별',monthly:'월별',yearly:'연별',today:'오늘',pending:'대기중',confirmed:'확인됨',in_service:'서비스중',completed:'완료',staff_request:'직원 지정',queue_today:'오늘 예약',col_time:'예약/시간',col_inout:'입실 — 퇴실',col_guest:'고객/서비스',col_staff:'직원',col_room:'룸',next_queue:'다음 순서',menu_staff:'직원',menu_services:'서비스',menu_rooms:'룸',menu_hours:'영업시간',menu_roles:'역할',menu_notify:'알림',menu_shop:'매장정보',manage_staff:'직원 관리',add_staff:'직원 추가',main_services:'주요 서비스',add_service:'서비스 추가',rooms:'룸',business_hours:'영업시간',roles:'역할 설정',notifications:'알림 설정',shop_info:'매장 정보',period:'기간:',pay_salary:'급여 지급',staff_cost:'인건비',ready:'근무중',on_leave:'휴가중'}
+};
+const MONTH_NAMES={en:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],th:['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'],zh:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],es:['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],ja:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],ko:['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월']};
+const DAYS_ABBR={en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],th:['อา','จ','อ','พ','พฤ','ศ','ส'],zh:['日','一','二','三','四','五','六'],es:['Do','Lu','Ma','Mi','Ju','Vi','Sa'],ja:['日','月','火','水','木','金','土'],ko:['일','월','화','수','목','금','토']};
+
+let currentLang='en';
+function tr(k){return(LANGS[currentLang]||LANGS.en)[k]||k}
+function applyLang(){document.querySelectorAll('.t[data-k]').forEach(el=>{el.textContent=tr(el.dataset.k)})}
+function setLang(l){
+  currentLang=l;
+  const flags={en:'🇺🇸',th:'🇹🇭',zh:'🇨🇳',es:'🇪🇸',ja:'🇯🇵',ko:'🇰🇷'};
+  document.getElementById('cur-lang-label').textContent=`${flags[l]} ${l.toUpperCase()}`;
+  document.querySelectorAll('.lang-item').forEach(i=>i.classList.remove('on'));
+  applyLang();renderSch();renderBoard();renderStaff();renderPayroll();renderSales();buildCalGrids();updateDateLbl();buildBkCal();
+  document.getElementById('lang-menu').classList.remove('on');
+}
+function toggleLang(){document.getElementById('lang-menu').classList.toggle('on')}
+document.addEventListener('click',function(e){if(!e.target.closest('#lang-btn')){const m=document.getElementById('lang-menu');if(m)m.classList.remove('on')}});
+
+/* ==================== CALENDAR PICKER ==================== */
+const calState={pr:{year:2026,month:4},sl:{year:2026,month:4}};
+function buildCalGrids(){['pr','sl'].forEach(id=>buildCalGrid(id))}
+function buildCalGrid(id){
+  const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const yrEl=document.getElementById(`${id}-cal-year`);if(yrEl)yrEl.textContent=currentLang==='th'?s.year+543:s.year;
+  const grid=document.getElementById(`${id}-month-grid`);
+  if(grid)grid.innerHTML=mn.map((m,i)=>`<div class="cal-month-btn ${i===s.month?'on':''}" onclick="selectCalMonth('${id}',${i})">${m}</div>`).join('');
+}
+function selectCalMonth(id,m){calState[id].month=m;buildCalGrid(id)}
+function shiftCalYear(id,d){calState[id].year+=d;buildCalGrid(id)}
+function applyCalPicker(id){
+  const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const yr=currentLang==='th'?s.year+543:s.year;
+  const label=`${mn[s.month]} ${yr}`;
+  document.getElementById(`${id}-cal-label`).textContent=label;
+  closeCalPicker(id);
+  if(id==='pr')renderPayroll();else renderSales();
+}
+function toggleCalPicker(id){
+  document.querySelectorAll('.cal-picker-popup').forEach(p=>{if(p.id!==`${id}-cal-popup`)p.classList.remove('on')});
+  document.getElementById(`${id}-cal-popup`).classList.toggle('on');
+}
+function closeCalPicker(id){const el=document.getElementById(`${id}-cal-popup`);if(el)el.classList.remove('on')}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.cal-picker-wrap'))document.querySelectorAll('.cal-picker-popup').forEach(p=>p.classList.remove('on'));
+  if(!e.target.closest('.date-cal-wrap'))closeBkCal();
+});
+
+/* ==================== BOOKING DATE CALENDAR ==================== */
+let bkCalView={year:0,month:0};
+function getBkDate(){const n=new Date();n.setDate(n.getDate()+dateOffset);n.setHours(0,0,0,0);return n}
+function getToday(){const t=new Date();t.setHours(0,0,0,0);return t}
+function updateDateLbl(){
+  const n=getBkDate(),da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const el=document.getElementById('date-lbl-text');if(el)el.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+}
+function syncBkCalView(){const d=getBkDate();bkCalView={year:d.getFullYear(),month:d.getMonth()}}
+function buildBkCal(syncView){
+  if(syncView!==false)syncBkCalView();
+  const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en,da=DAYS_ABBR[currentLang]||DAYS_ABBR.en;
+  const yr=currentLang==='th'?bkCalView.year+543:bkCalView.year;
+  const title=document.getElementById('bk-cal-title');if(title)title.textContent=`${mn[bkCalView.month]} ${yr}`;
+  const wdays=document.getElementById('bk-cal-wdays');if(wdays)wdays.innerHTML=da.map(d=>`<div class="date-cal-wday">${d}</div>`).join('');
+  const sel=getBkDate(),today=getToday();
+  const first=new Date(bkCalView.year,bkCalView.month,1),start=first.getDay(),days=new Date(bkCalView.year,bkCalView.month+1,0).getDate();
+  let html='';
+  for(let i=0;i<start;i++)html+='<div class="date-cal-day empty"></div>';
+  for(let d=1;d<=days;d++){
+    const dt=new Date(bkCalView.year,bkCalView.month,d);dt.setHours(0,0,0,0);
+    const isSel=dt.getTime()===sel.getTime(),isToday=dt.getTime()===today.getTime();
+    html+=`<div class="date-cal-day${isSel?' on':''}${isToday?' today':''}" onclick="selectBkDate(${bkCalView.year},${bkCalView.month},${d})">${d}</div>`;
+  }
+  const grid=document.getElementById('bk-cal-grid');if(grid)grid.innerHTML=html;
+}
+function toggleBkCal(e){e.stopPropagation();buildBkCal(true);document.querySelectorAll('.cal-picker-popup').forEach(p=>p.classList.remove('on'));document.getElementById('bk-cal-popup').classList.toggle('on')}
+function closeBkCal(){const el=document.getElementById('bk-cal-popup');if(el)el.classList.remove('on')}
+function shiftBkCalMonth(d){bkCalView.month+=d;if(bkCalView.month<0){bkCalView.month=11;bkCalView.year--}else if(bkCalView.month>11){bkCalView.month=0;bkCalView.year++}buildBkCal(false)}
+function selectBkDate(y,m,d){
+  const today=getToday(),sel=new Date(y,m,d);sel.setHours(0,0,0,0);
+  dateOffset=Math.round((sel-today)/86400000);
+  updateDateLbl();renderSch();closeBkCal();
+}
+function goBkToday(){dateOffset=0;updateDateLbl();renderSch();buildBkCal(true)}
+
+/* ==================== DATA ==================== */
+const STAFF_DATA=[
+  {name:'Pam',full:'Pamrin Suksong',role:'Massage Therapist',color:'#fdf0f3',tc:'#8a1a30',status:'on'},
+  {name:'Noon',full:'Nuchnat Meesuk',role:'Spa Therapist',color:'#eaf3fc',tc:'#0c447c',status:'on'},
+  {name:'Min',full:'Minta Dee-ngam',role:'Hair Stylist',color:'#eaf6ef',tc:'#185a32',status:'on'},
+  {name:'Jane',full:'Jennifer Thongdee',role:'Massage Therapist',color:'#fdf6e7',tc:'#7d5a00',status:'on'},
+  {name:'Bo',full:'Bo Suayngam',role:'Head Spa',color:'#f4f0fe',tc:'#3c3489',status:'leave'},
+];
+const SVCS=[{name:'Thai Massage 60 min',price:'500',dur:'60',type:'single'},{name:'Oil Massage 90 min',price:'800',dur:'90',type:'single'},{name:'Spa Body Treatment',price:'1,200',dur:'90',type:'single'},{name:'Facial',price:'900',dur:'60',type:'single'},{name:'Couple Massage 90 min',price:'1,600',dur:'90',type:'couple'},{name:'Haircut',price:'350',dur:'45',type:'single'}];
+const ADDONS_DATA=[{name:'Aromatherapy',price:'100'},{name:'Hot Stones',price:'200'},{name:'Thai Herbs',price:'150'},{name:'Body Scrub',price:'250'},{name:'Vitamin C Mask',price:'180'},{name:'Eye Treatment',price:'120'}];
+const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
+const HOURS_DATA=[{d:'Monday',open:true,from:'10:00',to:'21:00'},{d:'Tuesday',open:true,from:'10:00',to:'21:00'},{d:'Wednesday',open:true,from:'10:00',to:'21:00'},{d:'Thursday',open:true,from:'10:00',to:'21:00'},{d:'Friday',open:true,from:'10:00',to:'22:00'},{d:'Saturday',open:true,from:'09:00',to:'22:00'},{d:'Sunday',open:false,from:'10:00',to:'18:00'}];
+const INTAKE_FIELDS=[{label:'Full Name',type:'text'},{label:'Age',type:'number'},{label:'Phone',type:'tel'},{label:'Medical Conditions',type:'text'},{label:'Allergies',type:'text'},{label:'Pregnant',type:'yesno'},{label:'Recent Surgery',type:'text'},{label:'Pressure Preference',type:'select'},{label:'Notes',type:'text'}];
+const ROLES=[{key:'owner',label:'Owner',icon:'ti-crown',color:'#fdf0f3',tc:'#8a1a30',perms:['Booking','Queue','Settings','Payroll','Sales']},{key:'manager',label:'Manager',icon:'ti-user-check',color:'#eaf3fc',tc:'#0c447c',perms:['Booking','Queue','Settings','Payroll','Sales']},{key:'reception',label:'Reception',icon:'ti-headset',color:'#fdf6e7',tc:'#7d5a00',perms:['Booking','Queue','Sales']},{key:'staff',label:'Staff',icon:'ti-user',color:'#f4f4f4',tc:'#555',perms:['Booking','Queue','Payroll (own)']}];
+const WDAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const BOOKINGS=[
+  {h:9,m:0,dur:60,name:'Somying',svc:'Thai Massage',col:1,status:'done',req:false,addon:'Aroma',staff:'Pam',room:'Room 1',intime:'09:02',outtime:'10:05'},
+  {h:10,m:0,dur:90,name:'Vipha',svc:'Spa Body Treatment',col:2,status:'inservice',req:true,addon:'Scrub',staff:'Noon',room:'Room 2',intime:'10:00',outtime:''},
+  {h:10,m:30,dur:60,name:'Nan',svc:'Haircut',col:3,status:'inservice',req:false,addon:'',staff:'Min',room:'Room 3',intime:'10:32',outtime:''},
+  {h:11,m:0,dur:60,name:'Porn',svc:'Oil Massage',col:4,status:'confirm',req:true,addon:'',staff:'Jane',room:'VIP Room',intime:'',outtime:''},
+  {h:11,m:30,dur:60,name:'Jira',svc:'Facial',col:1,status:'confirm',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:''},
+  {h:13,m:0,dur:90,name:'Manee+',svc:'Couple Massage',col:2,status:'pending',req:false,addon:'Stones',staff:'',room:'Couple Room',intime:'',outtime:''},
+  {h:14,m:0,dur:60,name:'Wan',svc:'Thai Massage',col:3,status:'pending',req:false,addon:'',staff:'',room:'Room 1',intime:'',outtime:''},
+  {h:15,m:30,dur:90,name:'Napa',svc:'Spa',col:1,status:'pending',req:true,addon:'Mask',staff:'',room:'Room 2',intime:'',outtime:''},
+  {h:16,m:0,dur:60,name:'Ladda',svc:'Thai Massage',col:4,status:'pending',req:false,addon:'',staff:'',room:'VIP Room',intime:'',outtime:''},
+  {h:17,m:0,dur:60,name:'Supa',svc:'Facial',col:2,status:'pending',req:false,addon:'Vit C',staff:'',room:'Room 2',intime:'',outtime:''},
+];
+const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
+const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
+
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month';
+function fmt12(h,m){const ap=h<12?'AM':'PM';const h12=h===0?12:h>12?h-12:h;return`${h12}:${String(m).padStart(2,'0')} ${ap}`}
+function minsToHM(mins){const h=Math.floor(mins/60),m=mins%60;return h&&m?`${h}h ${m}m`:h?`${h}h`:`${m}m`}
+function pad2(n){return String(n).padStart(2,'0')}
+
+function setRole(r){
+  currentRole=r;
+  const B={owner:'b-role-owner',manager:'b-role-mgr',reception:'b-role-rec',staff:'b-role-staff'};
+  const I={owner:'ti-crown',manager:'ti-user-check',reception:'ti-headset',staff:'ti-user'};
+  const rb=document.getElementById('role-badge');rb.className='badge '+B[r];rb.innerHTML=`<i class="ti ${I[r]}" style="font-size:10px"></i>${r.charAt(0).toUpperCase()+r.slice(1)}`;
+  document.querySelectorAll('.ntab').forEach(t=>{t.style.display=(t.dataset.roles||'').split(',').includes(r)?'flex':'none'});
+  const mw=document.getElementById('mode-wrap');if(mw)mw.style.display=(r==='owner'||r==='manager')?'block':'none';
+  const nb=document.getElementById('bk-new-btn');if(nb)nb.style.display=r==='staff'?'none':'block';
+  const pb=document.getElementById('pay-btn');if(pb)pb.style.display=(r==='owner'||r==='manager')?'inline-flex':'none';
+  renderBoard();renderPayroll();
+}
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on')}
+function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on')}
+function openModal(id){document.getElementById('modal-'+id).classList.add('on')}
+function closeModal(id){document.getElementById('modal-'+id).classList.remove('on')}
+function chgDate(d){dateOffset+=d;updateDateLbl();renderSch();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
+function setMode(m,el){document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
+
+function renderSch(){
+  const COLS=5;
+  let html=`<div class="sch-head" style="grid-template-columns:72px repeat(${COLS},1fr)"><div class="sch-hcell">Time</div>`;
+  STAFF_DATA.forEach(s=>html+=`<div class="sch-hcell">${s.name}</div>`);
+  html+='</div>';
+  for(let h=0;h<24;h++){for(let m=0;m<60;m+=15){
+    const isH=m===0,isMid=h===0&&m===0,isNoon=h===12&&m===0;
+    html+=`<div class="time-row" style="grid-template-columns:72px repeat(${COLS},1fr);${isH?'border-top:0.5px solid #ddd':''}${isNoon?';background:#f9f9f9':''}${isMid?';border-top:2px solid #ccc':''}">`;
+    html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
+    for(let c=1;c<=COLS;c++){
+      html+=`<div class="tcell">`;
+      BOOKINGS.filter(b=>b.col===c&&b.h===h&&b.m===m).forEach(b=>{
+        const cls=b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray';
+        const rowH=Math.round(b.dur/15)*36;const endMins=b.h*60+b.m+b.dur;
+        html+=`<div class="bk-block ${cls}" style="height:${rowH-4}px" onclick="openModal('intake')">
+          <div class="bb-name">${b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
+          <div class="bb-meta">${b.svc}</div>
+          <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
+          ${b.addon?`<div class="bb-meta">+${b.addon}</div>`:''}
+          <div style="display:flex;justify-content:flex-end;margin-top:1px"><span style="font-size:9px;padding:1px 5px;border:1px solid #ddd;border-radius:3px;cursor:pointer;background:#fff" onclick="event.stopPropagation();openModal('intake')">Detail</span></div>
+        </div>`;
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  }}
+  document.getElementById('sch-grid').innerHTML=html;
+  setTimeout(()=>{const w=document.querySelector('.sch-wrap');if(w){const fh=BOOKINGS.length?Math.min(...BOOKINGS.map(b=>b.h)):9;w.scrollTop=fh*4*36}},50);
+}
+
+let editRowIdx=-1;
+function openEditBoard(idx){editRowIdx=idx;const b=BOOKINGS[idx];document.getElementById('eb-name').textContent=`${b.name} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
+function saveEditBoard(){if(editRowIdx>=0){BOOKINGS[editRowIdx].intime=document.getElementById('eb-in').value;BOOKINGS[editRowIdx].outtime=document.getElementById('eb-out').value;BOOKINGS[editRowIdx].staff=document.getElementById('eb-staff').value;}closeModal('editboard');renderBoard();renderSch()}
+
+function renderBoard(){
+  const canEdit=currentRole==='owner'||currentRole==='manager';
+  const sorted=[...BOOKINGS].sort((a,b)=>a.h*60+a.m-(b.h*60+b.m));
+  let html='';
+  sorted.forEach(b=>{
+    const oi=BOOKINGS.indexOf(b);
+    const cls=b.status==='inservice'?'s-inservice':b.status==='confirm'?'s-confirm':b.status==='done'?'s-done':'';
+    const pill={inservice:'<span class="spill">In Service</span>',confirm:'<span class="spill">Confirmed</span>',done:'<span class="spill">Done</span>',pending:'<span class="spill sp-wait">Waiting</span>'}[b.status]||'';
+    const showStaff=b.status==='inservice'||b.status==='done'||b.status==='confirm';
+    const inOut=b.intime?(b.outtime?`${b.intime} — ${b.outtime}`:`${b.intime} — ...`):'—';
+    const bEnd=b.h*60+b.m+b.dur;
+    html+=`<div class="board-row ${cls}">
+      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
+      <div><div style="font-size:11px;font-family:monospace">${inOut}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
+      <div><div class="brow-name">${b.name}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
+      <div>${showStaff&&b.staff?`<span style="font-size:11px">${b.staff}</span>`:canEdit?`<button class="btn btn-sm" style="padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-user-plus" style="font-size:10px"></i>Assign</button>`:'<span style="color:#999;font-size:10px">—</span>'}</div>
+      <div style="font-size:11px">${b.room}</div><div></div>
+    </div>`;
+  });
+  document.getElementById('board-rows').innerHTML=html;
+  document.getElementById('q-list').innerHTML=QUEUE_DATA.map(q=>`<div class="q-item"><div class="q-num">${q.num}</div><div class="q-name">${q.name}</div><div class="q-next">${q.next}</div><div class="q-time">${q.time}</div></div>`).join('');
+}
+
+function updateClock(){
+  const n=new Date(),p=v=>String(v).padStart(2,'0');
+  const c=document.getElementById('b-clock'),d=document.getElementById('b-date');
+  if(c)c.textContent=`${p(n.getHours())}:${p(n.getMinutes())}`;
+  const da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  if(d)d.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+}
+
+function renderStaff(){document.getElementById('staff-cards').innerHTML=STAFF_DATA.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${s.color};color:${s.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${s.name[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${s.full} <span style="font-size:11px;color:#888">(${s.name})</span></div><div style="font-size:11px;color:#888">${s.role}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
+function renderServices(){document.getElementById('svc-list').innerHTML=SVCS.map(s=>`<div class="svc-item"><div class="svc-name">${s.name}</div><span class="badge ${s.type==='couple'?'b-blue':'b-gray'}">${s.type==='couple'?'Couple':'Solo'}</span><div class="svc-price">฿${s.price}</div><div class="svc-dur">${s.dur} min</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('');document.getElementById('addon-list').innerHTML=ADDONS_DATA.map(a=>`<div class="svc-item"><div class="svc-name">${a.name}</div><div class="svc-price">+฿${a.price}</div><button class="btn btn-sm"><i class="ti ti-edit"></i></button></div>`).join('')}
+function renderRooms(){document.getElementById('rooms-cards').innerHTML=ROOMS_DATA.map((r,i)=>`<div class="scard" style="margin-bottom:0"><div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px"><i class="ti ti-door" style="font-size:14px;color:var(--rose)"></i>${r}</div><span class="badge b-green">Active</span></div><div style="font-size:11px;color:#888;margin-top:4px">${i===4?'2 guests':'1 guest'}</div></div>`).join('')}
+function renderHours(){document.getElementById('hours-rows').innerHTML=HOURS_DATA.map(h=>`<div style="display:grid;grid-template-columns:90px 1fr 1fr 40px;gap:8px;align-items:center;padding:6px 0;border-bottom:var(--bd);font-size:12px"><span>${h.d}</span><input type="time" value="${h.from}" style="font-size:11px;padding:3px 6px;width:100%"><input type="time" value="${h.to}" style="font-size:11px;padding:3px 6px;width:100%"><div class="tgl ${h.open?'on':''}" onclick="this.classList.toggle('on')"></div></div>`).join('')}
+function renderIntake(){document.getElementById('intake-fields').innerHTML=INTAKE_FIELDS.map(f=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:var(--bd);font-size:12px"><span>${f.label} <span style="font-size:10px;color:#999">(${f.type})</span></span><div class="tgl on" onclick="this.classList.toggle('on')"></div></div>`).join('')}
+function renderRoles(){document.getElementById('roles-list').innerHTML=ROLES.map(r=>`<div class="role-card"><div class="role-icon" style="background:${r.color};color:${r.tc}"><i class="ti ${r.icon}"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:500">${r.label}</div><div style="font-size:11px;color:#888;margin-top:3px">${r.perms.join(' · ')}</div></div><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
+function renderModalAddon(){const el=document.getElementById('modal-addon');if(el)el.innerHTML=ADDONS_DATA.map((a,i)=>`<div class="addon-item ${i<2?'on':''}" onclick="this.classList.toggle('on')"><i class="ti ti-sparkles" style="font-size:12px"></i>${a.name} +฿${a.price}</div>`).join('')}
+function renderWdaySel(){const el=document.getElementById('wday-sel');if(el)el.innerHTML=WDAYS.map((d,i)=>`<div class="wday-chip ${i<5?'on':''}" onclick="this.classList.toggle('on')">${d}</div>`).join('')}
+
+function getPeriodScale(p){return{day:0.04,week:0.25,month:1,year:12}[p]||1}
+function getPeriodLabel(p,id){const s=calState[id];const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;const yr=currentLang==='th'?s.year+543:s.year;if(p==='day')return`Today — ${new Date().getDate()} ${mn[new Date().getMonth()]} ${yr}`;if(p==='week')return`This Week`;if(p==='month')return`${mn[s.month]} ${yr}`;return`Year ${yr}`}
+function setPrPeriod(p,el){prPeriod=p;document.querySelectorAll('#page-payroll .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderPayroll()}
+function setSlPeriod(p,el){slPeriod=p;document.querySelectorAll('#page-sales .prtab').forEach(t=>t.classList.remove('on'));el.classList.add('on');renderSales()}
+
+function renderPayroll(){
+  const isStaff=currentRole==='staff';const rows=isStaff?PAYROLL_DATA.slice(0,1):PAYROLL_DATA;
+  const sc=getPeriodScale(prPeriod);
+  document.getElementById('pr-period-lbl').textContent=getPeriodLabel(prPeriod,'pr');
+  const tS=Math.round(rows.reduce((a,r)=>a+r.sales,0)*sc),tC=Math.round(rows.reduce((a,r)=>a+(r.commSvc+r.commAddon+r.commSpecial),0)*sc),tT=Math.round(rows.reduce((a,r)=>a+r.tip,0)*sc);
+  document.getElementById('pr-metrics').innerHTML=`<div class="mc"><div class="mc-lbl">Total Revenue</div><div class="mc-val">฿${tS.toLocaleString()}</div><div class="mc-sub mc-up">+12%</div></div><div class="mc"><div class="mc-lbl">Total Commission</div><div class="mc-val">฿${tC.toLocaleString()}</div></div><div class="mc"><div class="mc-lbl">Tip Credit</div><div class="mc-val">฿${tT.toLocaleString()}</div></div>`;
+  document.getElementById('pr-thead').innerHTML=`<th>Staff</th><th>Hours</th><th>Guests</th><th>Revenue</th><th>Svc Comm.</th><th>Add-on Comm.</th><th>Special Comm.</th><th>Total Comm.</th><th>Tip Credit</th><th>Total</th><th>Status</th><th></th>`;
+  const maxS=Math.max(...rows.map(r=>r.sales));
+  document.getElementById('pr-body').innerHTML=rows.map(p=>{
+    const s=Math.round(p.sales*sc),cs=Math.round(p.commSvc*sc),ca=Math.round(p.commAddon*sc),cx=Math.round(p.commSpecial*sc),tc=cs+ca+cx,tip=Math.round(p.tip*sc),hrs=Math.round(p.hrs*sc),cli=Math.round(p.clients*sc),pct=Math.round(p.sales/maxS*100);
+    return`<tr><td><div style="display:flex;align-items:center;gap:7px"><div class="pr-avatar" style="background:${p.color};color:${p.tc}">${p.name[0]}</div>${p.name}</div></td><td>${hrs}</td><td>${cli}</td><td><div>฿${s.toLocaleString()}</div><div class="bar-wrap"><div class="bar-fill" style="width:${pct}%"></div></div></td><td>฿${cs.toLocaleString()}</td><td>฿${ca.toLocaleString()}</td><td>฿${cx.toLocaleString()}</td><td style="font-weight:500">฿${tc.toLocaleString()}</td><td>฿${tip.toLocaleString()}</td><td style="font-weight:500">฿${(tc+tip).toLocaleString()}</td><td><span class="${p.paid?'pay-paid':'pay-pend'}">${p.paid?'Paid':'Pending'}</span></td><td><button class="btn btn-sm"><i class="ti ti-file-text"></i>Slip</button></td></tr>`;
+  }).join('');
+}
+
+function renderSales(){
+  const sc=getPeriodScale(slPeriod);
+  document.getElementById('sl-period-lbl').textContent=getPeriodLabel(slPeriod,'sl');
+  const rev=Math.round(182400*sc),orders=Math.round(218*sc),profit=Math.round(99850*sc);
+  document.getElementById('sales-metrics').innerHTML=`<div class="sum-card"><div class="sum-lbl">Total Revenue</div><div class="sum-val">฿${rev.toLocaleString()}</div><div class="sum-sub mc-up">+12%</div></div><div class="sum-card"><div class="sum-lbl">Orders</div><div class="sum-val">${orders}</div><div class="sum-sub" style="color:#888">${Math.round(185*sc)} guests</div></div><div class="sum-card"><div class="sum-lbl">Net Profit</div><div class="sum-val">฿${profit.toLocaleString()}</div><div class="sum-sub" style="color:#888">54.7% margin</div></div>`;
+  const ct=document.getElementById('sl-chart-title');if(ct)ct.textContent=slPeriod==='year'?'Monthly Revenue':'Daily Revenue';
+  const mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
+  const sd=slPeriod==='year'?[142000,155000,168000,172000,182400,0,0,0,0,0,0,0]:[28400,32100,24800,35600,31200,38800,30100];
+  const dl=slPeriod==='year'?mn:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const mx=Math.max(...sd.filter(v=>v>0));
+  const bc=document.getElementById('sales-bar'),bl=document.getElementById('sales-bar-lbl');
+  if(bc){bc.innerHTML=sd.map((v,i)=>`<div class="bcol ${i===5?'hi':''}" style="height:${v>0?Math.round(v/mx*100):3}%;${v===0?'opacity:.2':''}"></div>`).join('');bl.innerHTML=dl.map((d,i)=>`<div class="bcol-lbl" style="flex:1">${d}${sd[i]>0?`<br><span style="font-size:9px">${Math.round(sd[i]/1000)}k</span>`:''}</div>`).join('');}
+  const ms2=[{n:'Thai Massage 60 min',v:42000},{n:'Oil Massage 90 min',v:38400},{n:'Spa Body Treatment',v:33600},{n:'Facial',v:27000},{n:'Haircut',v:19250},{n:'Couple Massage',v:16000}];
+  const ao=[{n:'Body Scrub',v:8750},{n:'Hot Stones',v:7200},{n:'Aromatherapy',v:5600},{n:'Vitamin C Mask',v:4320},{n:'Eye Treatment',v:3360}];
+  const rl=id=>items=>{document.getElementById(id).innerHTML=items.map((s,i)=>`<div class="top-item"><div class="top-rank">${i+1}</div><div class="top-name">${s.n}</div><div class="top-val">฿${Math.round(s.v*sc).toLocaleString()}</div></div>`).join('')};
+  rl('top-main-svc')(ms2);rl('top-addon-svc')(ao);
+  const stcosts=[...PAYROLL_DATA].map(p=>({name:p.name,color:p.color,tc:p.tc,total:Math.round((p.commSvc+p.commAddon+p.commSpecial+p.tip)*sc)})).sort((a,b)=>b.total-a.total);
+  const mx2=Math.max(...stcosts.map(s=>s.total));
+  document.getElementById('staff-cost-list').innerHTML=stcosts.map((s,i)=>`<div class="top-item"><div class="top-rank" style="background:${s.color};color:${s.tc}">${i+1}</div><div class="top-name">${s.name}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px"><div class="top-val">฿${s.total.toLocaleString()}</div><div class="bar-wrap" style="width:70px"><div class="bar-fill" style="width:${Math.round(s.total/mx2*100)}%"></div></div></div></div>`).join('');
+}
+
+/* ==================== AUTH ==================== */
+const USERS = {
+  'owner':     { pass:'owner123',   role:'owner',     name:'Owner',     displayName:'Owner Admin' },
+  'manager':   { pass:'mgr123',     role:'manager',   name:'Manager',   displayName:'Manager' },
+  'reception': { pass:'rec123',     role:'reception', name:'Reception', displayName:'Reception' },
+  'staff':     { pass:'staff123',   role:'staff',     name:'Pam',       displayName:'Pam (Staff)' },
+  'pam':       { pass:'pam123',     role:'staff',     name:'Pam',       displayName:'Pam' },
+  'noon':      { pass:'noon123',    role:'staff',     name:'Noon',       displayName:'Noon' },
+  'min':       { pass:'min123',     role:'staff',     name:'Min',       displayName:'Min' },
+  'jane':      { pass:'jane123',    role:'staff',     name:'Jane',       displayName:'Jane' },
+};
+
+const ROLE_COLORS = {
+  owner:     { bg:'#fdf0f3', tc:'#8a1a30', icon:'ti-crown' },
+  manager:   { bg:'#eaf3fc', tc:'#0c447c', icon:'ti-user-check' },
+  reception: { bg:'#fdf6e7', tc:'#7d5a00', icon:'ti-headset' },
+  staff:     { bg:'#f4f4f4', tc:'#555',    icon:'ti-user' },
+};
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim().toLowerCase();
+  const p = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  const user = USERS[u];
+  if (!user || user.pass !== p) {
+    errEl.style.display = 'block';
+    errEl.textContent = 'Incorrect username or password. Please try again.';
+    document.getElementById('login-pass').value = '';
+    return;
+  }
+  errEl.style.display = 'none';
+  // Hide login screen
+  document.getElementById('login-screen').style.display = 'none';
+  // Set role silently
+  currentRole = user.role;
+  // Update nav user info
+  const rc = ROLE_COLORS[user.role];
+  const av = document.getElementById('nav-avatar');
+  if (av) { av.textContent = user.name[0].toUpperCase(); av.style.background = rc.bg; av.style.color = rc.tc; }
+  const un = document.getElementById('nav-username'); if (un) un.textContent = user.displayName;
+  const rl = document.getElementById('nav-role-label'); if (rl) rl.textContent = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+  // Apply role permissions
+  document.querySelectorAll('.ntab').forEach(t => {
+    t.style.display = (t.dataset.roles || '').split(',').includes(user.role) ? 'flex' : 'none';
+  });
+  const mw = document.getElementById('mode-wrap'); if (mw) mw.style.display = (user.role === 'owner' || user.role === 'manager') ? 'block' : 'none';
+  const nb = document.getElementById('bk-new-btn'); if (nb) nb.style.display = user.role === 'staff' ? 'none' : 'block';
+  const pb = document.getElementById('pay-btn'); if (pb) pb.style.display = (user.role === 'owner' || user.role === 'manager') ? 'inline-flex' : 'none';
+  renderBoard(); renderPayroll();
+}
+
+function doLogout() {
+  if (confirm('Sign out?')) {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+  }
+}
+
+/* INIT */
+updateDateLbl();buildCalGrids();buildBkCal();renderSch();renderBoard();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+setInterval(updateClock,1000);applyLang();
+// Show login on load — don't call setRole, wait for login
+</script>
+</body>
+</html>
