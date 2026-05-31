@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-05-30-v3">
+<meta name="app-version" content="2026-05-30-v4">
 <title>Sunshine — Management System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -407,7 +407,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="smenu" onclick="showSet('addons')" id="sm-addons"><i class="ti ti-plus-circle"></i>Add-on</div>
       <div class="smenu" onclick="showSet('rooms')" id="sm-rooms"><i class="ti ti-door"></i><span class="t" data-k="menu_rooms">Rooms</span></div>
       <div class="smenu" onclick="showSet('hours')" id="sm-hours"><i class="ti ti-clock"></i><span class="t" data-k="menu_hours">Hours</span></div>
-      <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i>Intake Form</div>
+      <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i><span class="t" data-k="intake_form">Intake form</span></div>
       <div class="smenu" onclick="showSet('tips')" id="sm-tips"><i class="ti ti-coin"></i><span class="t" data-k="menu_tips">Tips</span></div>
       <div class="smenu" onclick="showSet('roles')" id="sm-roles"><i class="ti ti-shield-check"></i><span class="t" data-k="menu_roles">Roles</span></div>
       <div class="smenu" onclick="showSet('notify')" id="sm-notify"><i class="ti ti-bell"></i><span class="t" data-k="menu_notify">Notifications</span></div>
@@ -438,9 +438,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="ssec" id="sec-rooms"><h3 class="t" data-k="rooms">Rooms</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="rooms-cards"></div></div>
       <div class="ssec" id="sec-hours"><h3 class="t" data-k="business_hours">Business Hours</h3><div class="scard"><div id="hours-rows"></div></div></div>
       <div class="ssec" id="sec-intake">
-        <h3>Intake Form</h3>
+        <h3 class="t" data-k="intake_form">Intake form</h3>
         <div class="scard"><h4>Standard Fields</h4><div id="intake-fields"></div></div>
-        <div class="scard" style="margin-top:8px"><h4>Custom Field</h4>
+        <div class="scard" style="margin-top:8px"><h4>Custom field</h4>
           <div class="fg-row" style="margin-bottom:8px">
             <div class="fg"><label>Field Name</label><input type="text" placeholder="e.g. Medical conditions"></div>
             <div class="fg"><label>Type</label><select><option>Text</option><option>Choice</option><option>Yes/No</option></select></div>
@@ -449,7 +449,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
         </div>
       </div>
       <div class="ssec" id="sec-tips">
-        <h3 class="t" data-k="tip_settings">Tip Presets</h3>
+        <h3 class="t" data-k="tip_settings">Tip presets</h3>
         <div class="scard">
           <p style="font-size:11px;color:var(--t2);margin-bottom:10px" class="t" data-k="tip_settings_desc">Configure quick-tip percentages (calculated from service subtotal before discount).</p>
           <div class="fg-row">
@@ -601,23 +601,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 </div>
 
 <div id="modal-intake" class="modal-bg">
-  <div class="modal">
-    <h3>Intake Form — Vipha<span class="modal-close" onclick="closeModal('intake')">&times;</span></h3>
-    <div class="intake-section"><h4>General Info</h4>
-      <div class="intake-row"><span>Name</span><span class="intake-val">Vipha Sukjai</span></div>
-      <div class="intake-row"><span>Age</span><span class="intake-val">34 yrs</span></div>
-      <div class="intake-row"><span>Phone</span><span class="intake-val">081-234-5678</span></div>
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3><span id="intake-title" class="t" data-k="intake_form">Intake form</span><span class="modal-close" onclick="closeIntakeModal()">&times;</span></h3>
+    <div class="intake-section"><h4>General information</h4>
+      <div class="intake-row"><span>Name</span><span class="intake-val" id="intake-val-name">Vipha Sukjai</span></div>
+      <div class="intake-row"><span>Age</span><span class="intake-val" id="intake-val-age">34 yrs</span></div>
+      <div class="intake-row"><span>Phone</span><span class="intake-val" id="intake-val-phone">081-234-5678</span></div>
     </div>
     <div class="intake-section"><h4>Health</h4>
-      <div class="intake-row"><span>Medical Conditions</span><span class="intake-val">Low blood pressure</span></div>
+      <div class="intake-row"><span>Medical conditions</span><span class="intake-val">Low blood pressure</span></div>
       <div class="intake-row"><span>Allergies</span><span class="intake-val">Lavender oil</span></div>
       <div class="intake-row"><span>Pregnant</span><span class="intake-val">No</span></div>
     </div>
     <div class="intake-section"><h4>Preferences</h4>
       <div class="intake-row"><span>Pressure</span><span class="intake-val">Medium</span></div>
-      <div class="intake-row"><span>Focus Areas</span><span class="intake-val">Back, Shoulders</span></div>
+      <div class="intake-row"><span>Focus areas</span><span class="intake-val">Back, shoulders</span></div>
     </div>
-    <button class="btn btn-sm" onclick="closeModal('intake')"><i class="ti ti-printer"></i>Print</button>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button type="button" class="btn btn-sm" id="intake-back-btn" style="display:none" onclick="backFromIntakeToDetail()"><i class="ti ti-arrow-left"></i><span class="t" data-k="back">Back</span></button>
+      <button type="button" class="btn btn-sm" id="intake-print-btn" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
+    </div>
   </div>
 </div>
 
@@ -819,7 +822,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
-  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name — Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment Detail',detail:'Detail',dob:'Date of Birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip Presets',tip_settings_desc:'Configure quick-tip percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom'},
+  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop information',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment detail',detail:'Detail',dob:'Date of birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip presets',tip_settings_desc:'Configure tip preset percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom',back:'Back'},
   th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',edit_booking:'แก้ไขการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',payment_detail:'รายละเอียดการชำระเงิน',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form',request:'Request',discount:'ส่วนลด',add_tips:'Add tips',add_tip:'ทิป',payment_method:'วิธีชำระเงิน',col_book_time:'เวลา',delay:'ล่าช้า',cancel:'ยกเลิก',menu_tips:'ทิป',tip_settings:'ตั้งค่า Tip',tip_settings_desc:'กำหนดเปอร์เซ็นต์ทิปด่วน (คำนวณจากยอดบริการรวม)',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'บันทึก',custom:'กำหนดเอง'},
   zh:{nav_booking:'在线预约',nav_display:'排队显示',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假'},
   es:{nav_booking:'Reservas',nav_display:'Cola',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja'},
@@ -1087,7 +1090,7 @@ let BOOKINGS=[];
 const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
 
-let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false;
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false,intakeFromBkDetail=false;
 const DRAG_HOLD_MS=450;
 const LATE_GRACE_MINS=5;
 const NO_SHOW_MINS=30;
@@ -1362,7 +1365,37 @@ function openBkDetail(idx){
   applyLang();
   openModal('bkdetail');
 }
-function openBkIntakeFromDetail(){const b=BOOKINGS[selBkIdx];if(!b)return;openBkIntake(selBkIdx)}
+function openBkIntakeFromDetail(){const b=BOOKINGS[selBkIdx];if(!b)return;intakeFromBkDetail=true;closeModal('bkdetail');openBkIntake(selBkIdx)}
+function setIntakeModalMode(fromDetail){
+  intakeFromBkDetail=!!fromDetail;
+  const backBtn=document.getElementById('intake-back-btn');
+  const printBtn=document.getElementById('intake-print-btn');
+  const title=document.getElementById('intake-title');
+  if(title){title.textContent=tr('intake_form');title.dataset.k='intake_form'}
+  if(backBtn)backBtn.style.display=fromDetail?'inline-flex':'none';
+  if(printBtn)printBtn.style.display=fromDetail?'none':'inline-flex';
+}
+function fillIntakeDemo(b){
+  const nameEl=document.getElementById('intake-val-name');
+  const phoneEl=document.getElementById('intake-val-phone');
+  if(nameEl&&b)nameEl.textContent=fmtGuestName(b);
+  if(phoneEl&&b)phoneEl.textContent=b.phone||'—';
+}
+function openBkIntake(idx){
+  const b=BOOKINGS[idx];if(!b)return;
+  fillIntakeDemo(b);
+  setIntakeModalMode(intakeFromBkDetail);
+  openModal('intake');
+}
+function backFromIntakeToDetail(){
+  closeModal('intake');
+  intakeFromBkDetail=false;
+  if(selBkIdx>=0)openBkDetail(selBkIdx);
+}
+function closeIntakeModal(){
+  if(intakeFromBkDetail)backFromIntakeToDetail();
+  else closeModal('intake');
+}
 function openBkReschedule(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
   document.getElementById('br-date').value=b.bookingDate||fmtDateISO(getBkDate());
@@ -1476,12 +1509,6 @@ async function completeCheckout(){
   await persistBookingFull(b);
   closeModal('bkdetail');
 }
-function openBkIntake(idx){
-  const b=BOOKINGS[idx];
-  const title=document.querySelector('#modal-intake h3');
-  if(title)title.innerHTML=`${tr('intake_form')} — ${fmtGuestName(b)}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;
-  openModal('intake');
-}
 function onBkDragStart(e,idx){if(BOOKINGS[idx]?.req){e.preventDefault();return}e.stopPropagation();bkSuppressClick=true;dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(idx))}
 function onBkDragEnd(e){e.target.classList.remove('dragging');dragBkIdx=-1;document.querySelectorAll('.tcell.drop-over,.tcell.drop-conflict').forEach(c=>c.classList.remove('drop-over','drop-conflict'))}
 function onCellDragOver(e){
@@ -1576,7 +1603,13 @@ function openClientModal(id){
   </div>`).join(''):`<div style="font-size:11px;color:var(--t2)">—</div>`;
   openModal('client');
 }
-function openClientIntake(id){const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;const title=document.querySelector('#modal-intake h3');if(title)title.innerHTML=`${tr('intake_form')} — ${fmtClientName(c)}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;openModal('intake')}
+function openClientIntake(id){
+  const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
+  intakeFromBkDetail=false;
+  fillIntakeDemo({fname:c.fname,lname:c.lname,phone:c.tel,name:fmtClientName(c)});
+  setIntakeModalMode(false);
+  openModal('intake');
+}
 function clientAction(a){
   const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
   if(a==='edit'){document.getElementById('ec-fname').value=c.fname;document.getElementById('ec-lname').value=c.lname;document.getElementById('ec-dob').value=c.dob;document.getElementById('ec-tel').value=c.tel;document.getElementById('ec-email').value=c.email;closeModal('client');openModal('editclient')}
