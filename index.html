@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-05-30-v4">
+<meta name="app-version" content="2026-05-30-v5">
 <title>Sunshine — Management System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -1365,7 +1365,13 @@ function openBkDetail(idx){
   applyLang();
   openModal('bkdetail');
 }
-function openBkIntakeFromDetail(){const b=BOOKINGS[selBkIdx];if(!b)return;intakeFromBkDetail=true;closeModal('bkdetail');openBkIntake(selBkIdx)}
+function openBkIntakeFromDetail(){
+  const idx=selBkIdx;
+  const b=BOOKINGS[idx];if(!b)return;
+  intakeFromBkDetail=true;
+  closeModal('bkdetail',{keepSelection:true});
+  openBkIntake(idx);
+}
 function setIntakeModalMode(fromDetail){
   intakeFromBkDetail=!!fromDetail;
   const backBtn=document.getElementById('intake-back-btn');
@@ -1637,7 +1643,7 @@ function setRole(r){
 function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));const pg=document.getElementById('page-'+id),tb=document.getElementById('tab-'+id);if(pg)pg.classList.add('on');if(tb)tb.classList.add('on');if(id==='booking')fetchBookings();if(id==='clients')renderClients()}
 function showSet(id){document.querySelectorAll('.ssec').forEach(s=>s.classList.remove('on'));document.querySelectorAll('.smenu').forEach(m=>m.classList.remove('on'));document.getElementById('sec-'+id).classList.add('on');document.getElementById('sm-'+id).classList.add('on')}
 function openModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.add('on')}
-function closeModal(id){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');selBkIdx=-1}}
+function closeModal(id,options={}){const el=document.getElementById('modal-'+id);if(el)el.classList.remove('on');if(id==='bkdetail'){showBkPanel('detail');if(!options.keepSelection)selBkIdx=-1}}
 function setupModalBackdropClose(){
   document.querySelectorAll('.modal-bg').forEach(bg=>{
     bg.addEventListener('click',function(e){if(e.target===bg)closeModal(bg.id.replace('modal-',''))});
