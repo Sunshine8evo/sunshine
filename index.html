@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="app-version" content="2026-05-30-v2">
+<meta name="app-version" content="2026-05-30-v3">
 <title>Sunshine — Management System</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
@@ -925,6 +925,42 @@ const SVCS=[{name:'Thai Massage 60 min',price:'65',dur:'60',type:'single'},{name
 const ADDONS_DATA=[{name:'Aromatherapy',price:'12'},{name:'Hot Stones',price:'25'},{name:'Thai Herbs',price:'18'},{name:'Body Scrub',price:'28'},{name:'Vitamin C Mask',price:'15'},{name:'Eye Treatment',price:'10'}];
 const CUR='$';
 function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function fmtGuestName(b){
+  if(!b)return'';
+  if(typeof b==='string')return b.trim();
+  const fn=(b.fname||'').trim(),ln=(b.lname||'').trim();
+  if(fn&&ln)return `${fn} ${ln}`;
+  if(fn)return fn;
+  if(ln)return ln;
+  return (b.name||'Guest').trim();
+}
+function fmtClientName(c){return fmtGuestName(c)}
+function getTodayDateISO(){return fmtDateISO(new Date())}
+function getQueueBookings(){return ALL_BOOKINGS.filter(b=>b.bookingDate===getTodayDateISO())}
+function refreshBookingUI(){syncBookingsView();renderSch();renderBoard()}
+function applyPatchToBooking(b,patch){
+  if(!b||!patch)return;
+  if(patch.col!=null)b.col=patch.col;
+  if(patch.h!=null)b.h=patch.h;
+  if(patch.m!=null)b.m=patch.m;
+  if(patch.dur!=null)b.dur=patch.dur;
+  if(patch.bookingDate!=null)b.bookingDate=patch.bookingDate;
+  if(patch.weekDay!=null)b.weekDay=patch.weekDay;
+  if(patch.staff!=null)b.staff=patch.staff;
+  if(patch.status!=null)b.status=patch.status;
+  if(patch.outtime!=null)b.outtime=patch.outtime;
+  if(patch.intime!=null)b.intime=patch.intime;
+  if(patch.svc!=null)b.svc=patch.svc;
+  if(patch.addon!=null)b.addon=patch.addon;
+  if(patch.notes!=null)b.notes=patch.notes;
+  if(patch.req!=null)b.req=patch.req;
+  if(patch.discount!=null)b.discount=patch.discount;
+  if(patch.tip!=null)b.tip=patch.tip;
+  if(patch.paymentMethod!=null)b.paymentMethod=patch.paymentMethod;
+  if(patch.fname!=null)b.fname=patch.fname;
+  if(patch.lname!=null)b.lname=patch.lname;
+  if(patch.name!=null)b.name=patch.name;
+}
 function parsePrice(s){return Number(String(s).replace(/[^0-9.]/g,''))||0}
 function getSvcPrice(name){if(!name)return 0;const s=SVCS.find(x=>name.includes(x.name)||x.name.includes(name));return s?parsePrice(s.price):0}
 function getAddonPrices(addonStr){if(!addonStr)return 0;return addonStr.split(',').reduce((sum,a)=>{const t=a.trim();const f=ADDONS_DATA.find(x=>t.includes(x.name)||x.name.includes(t));return sum+(f?parsePrice(f.price):0)},0)}
@@ -1075,7 +1111,7 @@ function rowToBooking(r){
     bookingDate:r.booking_date||'',
     h:Number(r.h)||0,m:Number(r.m)||0,dur:Number(r.dur)||60,
     fname:r.fname||parts[0]||'',lname:r.lname||parts.slice(1).join(' ')||'',
-    phone:r.phone||'',name:r.name||(r.fname||'Guest'),
+    phone:r.phone||'',name:r.name||[r.fname||parts[0],r.lname||parts.slice(1).join(' ')].filter(Boolean).join(' ')||'Guest',
     svc:(r.svc||'').split(' — ')[0],
     col:Number(r.staff_col??r.col)||1,
     status:r.status||'pending',req:!!r.req,
@@ -1133,6 +1169,9 @@ async function fetchBookings(){
   }
 }
 async function persistBookingPatch(b,patch){
+  if(!b)return;
+  applyPatchToBooking(b,patch);
+  refreshBookingUI();
   if(!b.id)return;
   const row={};
   if(patch.col!=null)row.staff_col=patch.col;
@@ -1140,6 +1179,7 @@ async function persistBookingPatch(b,patch){
   if(patch.m!=null)row.m=patch.m;
   if(patch.status)row.status=patch.status;
   if(patch.outtime!=null)row.outtime=patch.outtime;
+  if(patch.intime!=null)row.intime=patch.intime;
   if(patch.staff!=null)row.staff=patch.staff;
   if(patch.bookingDate)row.booking_date=patch.bookingDate;
   if(patch.dur!=null)row.dur=patch.dur;
@@ -1155,6 +1195,8 @@ async function persistBookingPatch(b,patch){
   if(error)console.error('persistBookingPatch:',error);
 }
 async function persistBookingFull(b){
+  if(!b)return;
+  refreshBookingUI();
   if(!b.id)return;
   const {error}=await sb.from('bookings').update(bookingToRow(b)).eq('id',b.id);
   if(error)console.error('persistBookingFull:',error);
@@ -1170,8 +1212,11 @@ function handleBookingRealtime(payload){
   }else if(t==='DELETE'&&o){
     ALL_BOOKINGS=ALL_BOOKINGS.filter(x=>x.id!==o.id);
   }
-  syncBookingsView();
-  renderSch();renderBoard();
+  refreshBookingUI();
+  if(selBkIdx>=0&&document.getElementById('modal-bkdetail')?.classList.contains('on')){
+    const i=BOOKINGS.findIndex(x=>x.id===ALL_BOOKINGS[selBkIdx]?.id||x===BOOKINGS[selBkIdx]);
+    if(i>=0)openBkDetail(i);
+  }
 }
 function setupBookingRealtime(){
   if(bkRealtimeChannel)return;
@@ -1223,7 +1268,7 @@ async function saveNewBooking(){
     errEl.style.display='block';return;
   }
   const row={
-    booking_date:bookingDate,h,m,dur,fname,lname,phone,name:guest,svc,
+    booking_date:bookingDate,h,m,dur,fname,lname,phone,name:`${fname}${lname?' '+lname:''}`.trim(),svc,
     staff_col:col,status:'pending',req,addon:getSelectedAddons(),
     staff,room:document.getElementById('nb-room').value||'',
     intime:'',outtime:'',week_day:calcWeekDay(bookingDate),
@@ -1235,8 +1280,7 @@ async function saveNewBooking(){
     if(error)throw error;
     const b=rowToBooking(data);
     if(!ALL_BOOKINGS.some(x=>x.id===b.id))ALL_BOOKINGS.push(b);
-    syncBookingsView();
-    renderSch();renderBoard();
+    refreshBookingUI();
     closeModal('newbk');resetNewBkForm();
   }catch(e){
     console.error('saveNewBooking:',e);
@@ -1276,13 +1320,13 @@ function bkBlockHtml(b,idx,mode){
   const noDrag=b.req?' no-drag':'';
   const blockCls=mode==='wk'?'wk-block':'bk-block';
   if(mode==='wk'){
-    return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" onclick="onBkBlockClick(${idx})"><div class="bb-name">${b.fname||b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div></div>`;
+    return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" onclick="onBkBlockClick(${idx})"><div class="bb-name">${fmtGuestName(b)}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div></div>`;
   }
   const endMins=b.h*60+b.m+b.dur;
   const holdEv=b.req?'':' onmousedown="onBkMouseDown(event,'+idx+')" onmouseup="onBkMouseUp(event,'+idx+')" onmouseleave="onBkMouseUp(event,'+idx+')" ontouchstart="onBkTouchStart(event,'+idx+')" ontouchend="onBkTouchEnd(event,'+idx+')"';
   const dragEv=b.req?'':' ondragstart="onBkDragStart(event,'+idx+')" ondragend="onBkDragEnd(event,'+idx+')"'+holdEv;
   return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px"${dragEv} onclick="onBkBlockClick(${idx})">
-    <div class="bb-name">${b.fname||b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
+    <div class="bb-name">${fmtGuestName(b)}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
     <div class="bb-meta">${b.svc}</div>
     <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
     ${b.addon?`<div class="bb-meta">+${b.addon}</div>`:''}
@@ -1340,7 +1384,6 @@ async function saveBkReschedule(){
     return;
   }
   await persistBookingPatch(b,{bookingDate:dateVal,h,m,dur,weekDay:b.weekDay});
-  syncBookingsView();renderSch();renderBoard();
   selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
   if(selBkIdx>=0)openBkDetail(selBkIdx);else{showBkPanel('detail');closeModal('bkdetail')}
 }
@@ -1377,7 +1420,6 @@ async function saveBkEdit(){
   if(b.req&&b.staff){const ci=STAFF_DATA.findIndex(s=>s.name===b.staff);if(ci>=0)b.col=ci+1}
   if(hasBookingConflict(b,b.id)){showConflictMsg('This time slot conflicts with another booking.');return}
   await persistBookingPatch(b,{svc:b.svc,addon:b.addon,notes:b.notes,staff:b.staff,req:b.req,col:b.col});
-  syncBookingsView();renderSch();renderBoard();
   selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
   if(selBkIdx>=0)openBkDetail(selBkIdx);
 }
@@ -1398,7 +1440,7 @@ function updateCheckoutTotal(){
 }
 function openBkCheckout(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
-  document.getElementById('co-client').textContent=`Client: ${b.fname||b.name||''} — ${b.lname||''}`.trim();
+  document.getElementById('co-client').textContent=`Client: ${fmtGuestName(b)}`;
   document.getElementById('co-staff').textContent=b.staff||'—';
   fillCoServiceLines('co-svc-lines',b);
   fillCoAddonLines('co-addon-section','co-addon-lines',b);
@@ -1412,7 +1454,7 @@ function openBkCheckout(){
 }
 function openBkPaymentDetail(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
-  document.getElementById('pd-client').textContent=`Client: ${b.fname||b.name||''} — ${b.lname||''}`.trim();
+  document.getElementById('pd-client').textContent=`Client: ${fmtGuestName(b)}`;
   document.getElementById('pd-staff').textContent=b.staff||'—';
   fillCoServiceLines('pd-svc-lines',b);
   fillCoAddonLines('pd-addon-section','pd-addon-lines',b);
@@ -1432,13 +1474,12 @@ async function completeCheckout(){
   b.status='done';
   const n=new Date();b.outtime=`${pad2(n.getHours())}:${pad2(n.getMinutes())}`;
   await persistBookingFull(b);
-  syncBookingsView();renderSch();renderBoard();
   closeModal('bkdetail');
 }
 function openBkIntake(idx){
   const b=BOOKINGS[idx];
   const title=document.querySelector('#modal-intake h3');
-  if(title)title.innerHTML=`${tr('intake_form')} — ${b.fname||b.name} ${b.lname||''}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;
+  if(title)title.innerHTML=`${tr('intake_form')} — ${fmtGuestName(b)}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;
   openModal('intake');
 }
 function onBkDragStart(e,idx){if(BOOKINGS[idx]?.req){e.preventDefault();return}e.stopPropagation();bkSuppressClick=true;dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(idx))}
@@ -1467,7 +1508,7 @@ function onCellDrop(e,col,h,m){
   b.col=col;b.h=h;b.m=m;
   if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;
   persistBookingPatch(b,{col,h,m,staff:b.staff});
-  syncBookingsView();renderSch();renderBoard();
+  dragBkIdx=-1;
 }
 function renderSch(){
   if(bkView==='weekly'){renderSchWeekly();return}
@@ -1514,15 +1555,15 @@ function renderClients(){
   const q=(document.getElementById('cl-search')?.value||'').toLowerCase();
   const rows=CLIENTS_DATA.filter(c=>!q||(`${c.fname} ${c.lname}`).toLowerCase().includes(q)||c.tel.includes(q));
   document.getElementById('cl-body').innerHTML=rows.map(c=>`<tr>
-    <td><a class="cl-name-link" onclick="openClientModal(${c.id})">${c.fname} — ${c.lname}</a></td>
+    <td><a class="cl-name-link" onclick="openClientModal(${c.id})">${fmtClientName(c)}</a></td>
     <td>${c.tel}</td>
   </tr>`).join('');
 }
 function openClientModal(id){
   selClientId=id;const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;
-  document.getElementById('cl-modal-title').textContent=`${c.fname} ${c.lname}`;
+  document.getElementById('cl-modal-title').textContent=fmtClientName(c);
   document.getElementById('cl-info-grid').innerHTML=`
-    <div class="cl-info-item"><label>${tr('col_name')}</label><span>${c.fname} — ${c.lname}</span></div>
+    <div class="cl-info-item"><label>${tr('col_name')}</label><span>${fmtClientName(c)}</span></div>
     <div class="cl-info-item"><label>${tr('dob')}</label><span>${c.dob}</span></div>
     <div class="cl-info-item"><label>${tr('col_tel')}</label><span>${c.tel}</span></div>
     <div class="cl-info-item"><label>${tr('email')}</label><span>${c.email}</span></div>
@@ -1535,7 +1576,7 @@ function openClientModal(id){
   </div>`).join(''):`<div style="font-size:11px;color:var(--t2)">—</div>`;
   openModal('client');
 }
-function openClientIntake(id){const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;const title=document.querySelector('#modal-intake h3');if(title)title.innerHTML=`${tr('intake_form')} — ${c.fname} ${c.lname}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;openModal('intake')}
+function openClientIntake(id){const c=CLIENTS_DATA.find(x=>x.id===id);if(!c)return;const title=document.querySelector('#modal-intake h3');if(title)title.innerHTML=`${tr('intake_form')} — ${fmtClientName(c)}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;openModal('intake')}
 function clientAction(a){
   const c=CLIENTS_DATA.find(x=>x.id===selClientId);if(!c)return;
   if(a==='edit'){document.getElementById('ec-fname').value=c.fname;document.getElementById('ec-lname').value=c.lname;document.getElementById('ec-dob').value=c.dob;document.getElementById('ec-tel').value=c.tel;document.getElementById('ec-email').value=c.email;closeModal('client');openModal('editclient')}
@@ -1585,6 +1626,7 @@ function renderBoardStaffCell(b,canEdit,oi){
   const reqMark=b.req?'<span class="req-mark">★</span>':'';
   if(queueMode==='auto'){
     if(b.status==='inservice'||b.status==='done')return reqMark+(b.staff||'—');
+    if(b.req&&b.staff)return reqMark+b.staff;
     return '<span style="color:#ccc;font-size:10px">—</span>';
   }
   const disp=getQueueDisplayStatus(b);
@@ -1595,10 +1637,10 @@ function renderBoardStaffCell(b,canEdit,oi){
 
 function renderBoard(){
   const canEdit=currentRole==='owner'||currentRole==='manager';
-  const sorted=[...BOOKINGS].sort((a,b)=>a.h*60+a.m-(b.h*60+b.m));
+  const sorted=getQueueBookings().sort((a,b)=>a.h*60+a.m-(b.h*60+b.m));
   let html='';
   sorted.forEach(b=>{
-    const oi=BOOKINGS.indexOf(b);
+    const oi=ALL_BOOKINGS.indexOf(b);
     const dispStatus=getQueueDisplayStatus(b);
     const cls=dispStatus==='inservice'?'s-inservice':dispStatus==='confirm'?'s-confirm':dispStatus==='done'?'s-done':dispStatus==='delay'?'s-delay':dispStatus==='cancel'?'s-cancel':'';
     const pill={
@@ -1613,7 +1655,7 @@ function renderBoard(){
     html+=`<div class="board-row ${cls}">
       <div><div style="font-size:11px;font-family:monospace;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
       <div><div style="font-size:11px;font-family:monospace;font-weight:500">${fmt12(b.h,b.m)}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
-      <div><div class="brow-name">${b.name}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
+      <div><div class="brow-name">${fmtGuestName(b)}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
       <div style="font-size:11px">${renderBoardStaffCell(b,canEdit,oi)}</div>
       <div style="font-size:11px">${b.room||'—'}</div><div></div>
     </div>`;
@@ -1623,8 +1665,16 @@ function renderBoard(){
 }
 
 let editRowIdx=-1;
-function openEditBoard(idx){editRowIdx=idx;const b=BOOKINGS[idx];document.getElementById('eb-name').textContent=`${b.name} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
-function saveEditBoard(){if(editRowIdx>=0){BOOKINGS[editRowIdx].intime=document.getElementById('eb-in').value;BOOKINGS[editRowIdx].outtime=document.getElementById('eb-out').value;BOOKINGS[editRowIdx].staff=document.getElementById('eb-staff').value;}closeModal('editboard');renderBoard();renderSch()}
+function openEditBoard(idx){editRowIdx=idx;const b=ALL_BOOKINGS[idx]||getQueueBookings()[idx];if(!b)return;document.getElementById('eb-name').textContent=`${fmtGuestName(b)} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
+async function saveEditBoard(){
+  if(editRowIdx<0)return;
+  const b=ALL_BOOKINGS[editRowIdx];if(!b)return;
+  const intime=document.getElementById('eb-in').value;
+  const outtime=document.getElementById('eb-out').value;
+  const staff=document.getElementById('eb-staff').value;
+  await persistBookingPatch(b,{intime,outtime,staff});
+  closeModal('editboard');
+}
 
 let lastBoardMin=-1;
 function updateClock(){
