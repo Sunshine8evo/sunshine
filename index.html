@@ -73,7 +73,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .time-row{display:grid;border-bottom:0.5px solid #ececec}
 .time-lbl{padding:4px 8px;font-size:10px;color:var(--t2);border-right:var(--bd);display:flex;align-items:flex-start;padding-top:5px;white-space:nowrap;min-height:36px}
 .tcell{border-right:var(--bd);position:relative;min-height:36px}.tcell:last-child{border-right:none}
-.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:grab;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s,box-shadow .15s;display:flex;flex-direction:column}
+.bk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:4px 5px;font-size:10px;cursor:pointer;z-index:1;border-left:3px solid transparent;overflow:hidden;transition:opacity .15s,box-shadow .15s;display:flex;flex-direction:column}
 .bk-block:hover{opacity:.95;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .bk-block.dragging{opacity:.5;cursor:grabbing}
 .bk-block.no-drag{cursor:default}
@@ -88,12 +88,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .wk-grid{min-width:800px}
 .wk-hcell{text-align:center}
 .wk-hcell small{display:block;font-size:9px;color:var(--t2);font-weight:400;margin-top:1px}
-.wk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 4px;font-size:9px;z-index:1;border-left:3px solid transparent;overflow:hidden;cursor:pointer}
+.wk-block{position:absolute;left:2px;right:2px;border-radius:4px;padding:3px 4px;font-size:9px;z-index:1;border-left:3px solid transparent;overflow:hidden;cursor:pointer;display:flex;align-items:center}
 .bb-yellow{background:#fef9e7;border-left-color:#d4a017;color:#7d5a00}.bb-blue{background:#eaf3fc;border-left-color:#2271c3;color:#0c447c}
 .bb-green{background:#eaf6ef;border-left-color:#2a8a52;color:#185a32}.bb-gray{background:#f4f4f4;border-left-color:#999;color:#555}
 .bb-name{font-weight:500;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bb-meta{font-size:9px;opacity:.85;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .req-icon{font-size:9px;color:#d48b1a}
+.bk-block.hold-drag-ready{cursor:grab;box-shadow:0 0 0 2px var(--rose)}
+.tcell.drop-conflict{background:#fef2f2;outline:1px dashed #e53935}
+.co-section{margin-bottom:6px}
+.co-section-lbl{font-size:12px;font-weight:500;padding:5px 0;border-bottom:var(--bd)}
+.co-item{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0}
+.co-item.indent{padding-left:1.4em;color:var(--t2)}
+.co-item.indent span:last-child{font-weight:500;color:var(--t)}
+.tip-btns{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.tip-btn{padding:6px 12px;border-radius:var(--r);border:var(--bd2);background:var(--sf);cursor:pointer;font-size:11px;transition:all .15s}
+.tip-btn.on{background:var(--rose);color:#fff;border-color:var(--rose)}
+.tip-btn.custom{min-width:72px}
+.req-mark{color:#e53935;font-size:12px;line-height:1;margin-right:2px}
+.sp-delay{background:#fce4ec;color:#c62828}.sp-cancel{background:#ffebee;color:#b71c1c}
 .legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t2)}
 .leg-dot{width:10px;height:10px;border-radius:2px}
@@ -125,6 +138,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .board-row{display:grid;gap:5px;padding:9px 14px;border-bottom:var(--bd);align-items:center;grid-template-columns:105px 115px 1fr 105px 80px 70px}
 .board-row:last-child{border-bottom:none}
 .board-row.s-inservice{background:#eaf6ef}.board-row.s-confirm{background:#eaf3fc}.board-row.s-done{opacity:.5}
+.board-row.s-delay{background:#fff8f8}.board-row.s-cancel{opacity:.55}
 .brow-name{font-size:12px;font-weight:500}.brow-svc{font-size:10px;color:var(--t2);margin-top:2px}.brow-addon{font-size:10px;color:#d48b1a;margin-top:1px}
 .spill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
 .s-inservice .spill{background:#c6efd8;color:#185a32}.s-confirm .spill{background:#c8e2f7;color:#0c447c}.s-done .spill{background:#e8e8e8;color:#666}.sp-wait{background:#fef9e7;color:#7d5a00}
@@ -368,7 +382,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     </div>
     <div style="display:grid;grid-template-columns:105px 115px 1fr 105px 80px 70px;gap:5px;padding:7px 14px;background:var(--sf2);border-bottom:var(--bd);font-size:10px;color:var(--t2);font-weight:500">
       <div class="t" data-k="col_time">Booking / Dur.</div>
-      <div class="t" data-k="col_inout">In — Out</div>
+      <div class="t" data-k="col_book_time">Time</div>
       <div class="t" data-k="col_guest">Guest / Service</div>
       <div class="t" data-k="col_staff">Staff</div>
       <div class="t" data-k="col_room">Room</div>
@@ -392,6 +406,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
       <div class="smenu" onclick="showSet('rooms')" id="sm-rooms"><i class="ti ti-door"></i><span class="t" data-k="menu_rooms">Rooms</span></div>
       <div class="smenu" onclick="showSet('hours')" id="sm-hours"><i class="ti ti-clock"></i><span class="t" data-k="menu_hours">Hours</span></div>
       <div class="smenu" onclick="showSet('intake')" id="sm-intake"><i class="ti ti-forms"></i>Intake Form</div>
+      <div class="smenu" onclick="showSet('tips')" id="sm-tips"><i class="ti ti-coin"></i><span class="t" data-k="menu_tips">Tips</span></div>
       <div class="smenu" onclick="showSet('roles')" id="sm-roles"><i class="ti ti-shield-check"></i><span class="t" data-k="menu_roles">Roles</span></div>
       <div class="smenu" onclick="showSet('notify')" id="sm-notify"><i class="ti ti-bell"></i><span class="t" data-k="menu_notify">Notifications</span></div>
       <div class="smenu" onclick="showSet('shop')" id="sm-shop"><i class="ti ti-building-store"></i><span class="t" data-k="menu_shop">Shop Info</span></div>
@@ -429,6 +444,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
             <div class="fg"><label>Type</label><select><option>Text</option><option>Choice</option><option>Yes/No</option></select></div>
           </div>
           <button class="btn btn-p btn-sm"><i class="ti ti-plus"></i>Add Field</button>
+        </div>
+      </div>
+      <div class="ssec" id="sec-tips">
+        <h3 class="t" data-k="tip_settings">Tip Presets</h3>
+        <div class="scard">
+          <p style="font-size:11px;color:var(--t2);margin-bottom:10px" class="t" data-k="tip_settings_desc">Configure quick-tip percentages (calculated from service subtotal before discount).</p>
+          <div class="fg-row">
+            <div class="fg"><label class="t" data-k="tip_preset_1">Preset 1 (%)</label><input type="number" id="tip-pct-1" min="0" max="100" step="1" value="10"></div>
+            <div class="fg"><label class="t" data-k="tip_preset_2">Preset 2 (%)</label><input type="number" id="tip-pct-2" min="0" max="100" step="1" value="20"></div>
+            <div class="fg"><label class="t" data-k="tip_preset_3">Preset 3 (%)</label><input type="number" id="tip-pct-3" min="0" max="100" step="1" value="30"></div>
+          </div>
+          <button type="button" class="btn btn-p btn-sm" onclick="saveTipPresets()"><i class="ti ti-check"></i><span class="t" data-k="save">Save</span></button>
         </div>
       </div>
       <div class="ssec" id="sec-roles"><h3 class="t" data-k="roles">Roles</h3><div id="roles-list"></div></div>
@@ -744,10 +771,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div id="bk-panel-checkout" class="bk-panel">
       <div class="co-client" id="co-client"></div>
       <div class="co-line"><span>Staff</span><span id="co-staff"></span></div>
-      <div class="co-line"><span id="co-svc-lbl">Service</span><span id="co-svc-price"></span></div>
-      <div class="co-line" id="co-addon-row" style="display:none"><span id="co-addon-lbl">Add-on</span><span id="co-addon-price"></span></div>
-      <div class="fg" style="margin-top:10px"><label>Discount ($)</label><input type="number" id="co-discount" value="0" min="0" step="0.01" oninput="updateCheckoutTotal()"></div>
-      <div class="fg"><label class="t" data-k="add_tip">Add tip ($)</label><input type="number" id="co-tip" value="0" min="0" step="0.01" oninput="updateCheckoutTotal()"></div>
+      <div class="co-section">
+        <div class="co-section-lbl">Services</div>
+        <div id="co-svc-lines"></div>
+      </div>
+      <div class="co-section" id="co-addon-section" style="display:none">
+        <div class="co-section-lbl">Add-on</div>
+        <div id="co-addon-lines"></div>
+      </div>
+      <div class="fg" style="margin-top:10px"><label>Discount ($)</label><input type="number" id="co-discount" value="0" min="0" step="0.01" oninput="onCheckoutInputChange()"></div>
+      <div class="fg">
+        <label class="t" data-k="add_tips">Add tips</label>
+        <div class="tip-btns" id="co-tip-btns"></div>
+        <input type="number" id="co-tip" value="0" min="0" step="0.01" placeholder="Custom amount" oninput="onTipCustomInput()">
+      </div>
       <div class="co-total" id="co-total">$0</div>
       <div class="fg"><label class="t" data-k="payment_method">Payment method</label><div class="pay-methods" id="co-pay-methods"></div></div>
       <div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px">
@@ -760,10 +797,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
     <div id="bk-panel-payment" class="bk-panel">
       <div class="co-client" id="pd-client"></div>
       <div class="co-line"><span>Staff</span><span id="pd-staff"></span></div>
-      <div class="co-line"><span>Service</span><span id="pd-svc-price"></span></div>
-      <div class="co-line" id="pd-addon-row" style="display:none"><span>Add-on</span><span id="pd-addon-price"></span></div>
+      <div class="co-section">
+        <div class="co-section-lbl">Services</div>
+        <div id="pd-svc-lines"></div>
+      </div>
+      <div class="co-section" id="pd-addon-section" style="display:none">
+        <div class="co-section-lbl">Add-on</div>
+        <div id="pd-addon-lines"></div>
+      </div>
       <div class="co-line"><span class="t" data-k="discount">Discount</span><span id="pd-discount"></span></div>
-      <div class="co-line"><span class="t" data-k="add_tip">Tip</span><span id="pd-tip"></span></div>
+      <div class="co-line"><span class="t" data-k="add_tips">Tips</span><span id="pd-tip"></span></div>
       <div class="co-total" id="pd-total"></div>
       <div class="co-line"><span class="t" data-k="payment_method">Payment</span><span id="pd-method"></span></div>
     </div>
@@ -774,8 +817,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 <script>
 /* ==================== TRANSLATIONS ==================== */
 const LANGS={
-  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name — Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment Detail',detail:'Detail',dob:'Date of Birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tip:'Add tip',payment_method:'Payment method'},
-  th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',edit_booking:'แก้ไขการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',payment_detail:'รายละเอียดการชำระเงิน',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form',request:'Request',discount:'ส่วนลด',add_tip:'ทิป',payment_method:'วิธีชำระเงิน'},
+  en:{nav_calendar:'Calendar',nav_clients:'Clients',nav_display:'Queue Display',nav_settings:'Settings',nav_payroll:'Payroll',nav_sales:'Sales Summary',logout:'Logout',new_booking:'New Booking',all_staff:'All Staff',daily:'Daily',weekly:'Weekly',monthly:'Monthly',yearly:'Yearly',today:'Today',today_view:'Today',pending:'Pending',confirmed:'Confirmed',in_service:'In Service',completed:'Completed',staff_request:'Staff Request',queue_today:"Today's Queue",col_time:'Booking / Dur.',col_inout:'In — Out',col_book_time:'Time',col_guest:'Guest / Service',col_staff:'Staff',col_room:'Room',col_name:'Name — Surname',col_tel:'Tel.',next_queue:'Next Up',menu_staff:'Staff',menu_services:'Services',menu_rooms:'Rooms',menu_hours:'Hours',menu_roles:'Roles',menu_tips:'Tips',menu_notify:'Notifications',menu_shop:'Shop Info',manage_staff:'Manage Staff',add_staff:'Add Staff',main_services:'Main Services',add_service:'Add Service',rooms:'Rooms',business_hours:'Business Hours',roles:'Roles',notifications:'Notifications',shop_info:'Shop Information',period:'Period:',pay_salary:'Pay Salary',staff_cost:'Staff Costs',ready:'Ready',on_leave:'On Leave',select_language:'Select Language',booking_history:'Booking History',reschedule:'Reschedule',book_again:'Book again',edit_personal:'Edit personal information',booking_detail:'Booking Detail',edit_booking:'Edit booking',intake_form:'Intake form',checkout:'Check out',payment_detail:'Payment Detail',detail:'Detail',dob:'Date of Birth',email:'Email',age:'Age',view_intake:'View intake form',request:'Request',discount:'Discount',add_tips:'Add tips',add_tip:'Add tip',payment_method:'Payment method',delay:'Delay',cancel:'Cancel',tip_settings:'Tip Presets',tip_settings_desc:'Configure quick-tip percentages (calculated from total service amount).',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'Save',custom:'Custom'},
+  th:{nav_calendar:'ปฏิทิน',nav_clients:'ลูกค้า',nav_display:'จอแสดงผล',nav_settings:'ตั้งค่า',nav_payroll:'เงินเดือน',nav_sales:'สรุปยอดขาย',logout:'ออกจากระบบ',new_booking:'จองใหม่',all_staff:'ทุกพนักงาน',daily:'รายวัน',weekly:'รายสัปดาห์',monthly:'รายเดือน',yearly:'รายปี',today:'วันนี้',today_view:'วันนี้',pending:'รอยืนยัน',confirmed:'ยืนยันแล้ว',in_service:'กำลังบริการ',completed:'เสร็จแล้ว',staff_request:'รีเควสพนักงาน',queue_today:'คิวบริการวันนี้',col_time:'เวลาจอง / ชม.',col_inout:'เข้า — ออก',col_guest:'ลูกค้า / บริการ',col_staff:'พนักงาน',col_room:'ห้อง',col_name:'ชื่อ — นามสกุล',col_tel:'เบอร์โทร',next_queue:'คิวถัดไป',menu_staff:'พนักงาน',menu_services:'บริการหลัก',menu_rooms:'ห้อง',menu_hours:'เวลาทำการ',menu_roles:'บทบาท',menu_notify:'แจ้งเตือน',menu_shop:'ข้อมูลร้าน',manage_staff:'จัดการพนักงาน',add_staff:'เพิ่มพนักงาน',main_services:'บริการหลัก',add_service:'เพิ่มบริการ',rooms:'ห้องบริการ',business_hours:'เวลาทำการ',roles:'บทบาท (Role)',notifications:'การแจ้งเตือน',shop_info:'ข้อมูลร้าน',period:'ช่วงเวลา:',pay_salary:'จ่ายเงินเดือน',staff_cost:'ค่าใช้จ่ายพนักงาน',ready:'พร้อมทำงาน',on_leave:'ลาหยุด',select_language:'เลือกภาษา',booking_history:'ประวัติการจอง',reschedule:'เลื่อนนัด',book_again:'จองอีกครั้ง',edit_personal:'แก้ไขข้อมูลส่วนตัว',booking_detail:'รายละเอียดการจอง',edit_booking:'แก้ไขการจอง',intake_form:'แบบฟอร์ม Intake',checkout:'Check out',payment_detail:'รายละเอียดการชำระเงิน',detail:'รายละเอียด',dob:'วันเกิด',email:'อีเมล',age:'อายุ',view_intake:'ดู Intake form',request:'Request',discount:'ส่วนลด',add_tips:'Add tips',add_tip:'ทิป',payment_method:'วิธีชำระเงิน',col_book_time:'เวลา',delay:'ล่าช้า',cancel:'ยกเลิก',menu_tips:'ทิป',tip_settings:'ตั้งค่า Tip',tip_settings_desc:'กำหนดเปอร์เซ็นต์ทิปด่วน (คำนวณจากยอดบริการรวม)',tip_preset_1:'Preset 1 (%)',tip_preset_2:'Preset 2 (%)',tip_preset_3:'Preset 3 (%)',save:'บันทึก',custom:'กำหนดเอง'},
   zh:{nav_booking:'在线预约',nav_display:'排队显示',nav_settings:'设置',nav_payroll:'薪资',nav_sales:'销售摘要',logout:'退出',new_booking:'新预约',all_staff:'所有员工',daily:'每日',weekly:'每周',monthly:'每月',yearly:'每年',today:'今天',pending:'待确认',confirmed:'已确认',in_service:'服务中',completed:'已完成',staff_request:'指定技师',queue_today:'今日排队',col_time:'预约/时间',col_inout:'入 — 出',col_guest:'客人/服务',col_staff:'员工',col_room:'房间',next_queue:'下一位',menu_staff:'员工',menu_services:'服务项目',menu_rooms:'房间',menu_hours:'营业时间',menu_roles:'角色',menu_notify:'通知',menu_shop:'店铺信息',manage_staff:'管理员工',add_staff:'添加员工',main_services:'主要服务',add_service:'添加服务',rooms:'房间',business_hours:'营业时间',roles:'角色权限',notifications:'通知设置',shop_info:'店铺信息',period:'时间段:',pay_salary:'发薪资',staff_cost:'员工成本',ready:'在班',on_leave:'休假'},
   es:{nav_booking:'Reservas',nav_display:'Cola',nav_settings:'Ajustes',nav_payroll:'Nómina',nav_sales:'Ventas',logout:'Salir',new_booking:'Nueva Reserva',all_staff:'Todo el personal',daily:'Diario',weekly:'Semanal',monthly:'Mensual',yearly:'Anual',today:'Hoy',pending:'Pendiente',confirmed:'Confirmado',in_service:'En servicio',completed:'Completado',staff_request:'Solicitud personal',queue_today:'Cola de hoy',col_time:'Reserva / Dur.',col_inout:'Entrada — Salida',col_guest:'Huésped / Servicio',col_staff:'Personal',col_room:'Sala',next_queue:'Siguiente',menu_staff:'Personal',menu_services:'Servicios',menu_rooms:'Salas',menu_hours:'Horario',menu_roles:'Roles',menu_notify:'Notificaciones',menu_shop:'Info tienda',manage_staff:'Gestionar personal',add_staff:'Agregar personal',main_services:'Servicios principales',add_service:'Agregar servicio',rooms:'Salas',business_hours:'Horario',roles:'Roles',notifications:'Notificaciones',shop_info:'Información tienda',period:'Período:',pay_salary:'Pagar nómina',staff_cost:'Costos personal',ready:'Disponible',on_leave:'De baja'},
   ja:{nav_booking:'予約',nav_display:'待ち行列',nav_settings:'設定',nav_payroll:'給与',nav_sales:'売上概要',logout:'ログアウト',new_booking:'新規予約',all_staff:'全スタッフ',daily:'日次',weekly:'週次',monthly:'月次',yearly:'年次',today:'今日',pending:'保留中',confirmed:'確認済',in_service:'施術中',completed:'完了',staff_request:'スタッフ指名',queue_today:'本日の予約',col_time:'予約/時間',col_inout:'入室 — 退室',col_guest:'顧客/サービス',col_staff:'スタッフ',col_room:'部屋',next_queue:'次の顧客',menu_staff:'スタッフ',menu_services:'サービス',menu_rooms:'部屋',menu_hours:'営業時間',menu_roles:'役割',menu_notify:'通知',menu_shop:'店舗情報',manage_staff:'スタッフ管理',add_staff:'スタッフ追加',main_services:'主要サービス',add_service:'サービス追加',rooms:'部屋',business_hours:'営業時間',roles:'役割設定',notifications:'通知設定',shop_info:'店舗情報',period:'期間:',pay_salary:'給与支払',staff_cost:'人件費',ready:'勤務中',on_leave:'休暇中'},
@@ -882,7 +925,82 @@ const CUR='$';
 function fmtMoney(n){return CUR+Number(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function parsePrice(s){return Number(String(s).replace(/[^0-9.]/g,''))||0}
 function getSvcPrice(name){if(!name)return 0;const s=SVCS.find(x=>name.includes(x.name)||x.name.includes(name));return s?parsePrice(s.price):0}
-function getAddonPrices(addonStr){if(!addonStr)return 0;return addonStr.split(',').reduce((sum,a)=>{const t=a.trim();const f=ADDONS_DATA.find(x=>t.includes(x.name));return sum+(f?parsePrice(f.price):0)},0)}
+function getAddonPrices(addonStr){if(!addonStr)return 0;return addonStr.split(',').reduce((sum,a)=>{const t=a.trim();const f=ADDONS_DATA.find(x=>t.includes(x.name)||x.name.includes(t));return sum+(f?parsePrice(f.price):0)},0)}
+function parseAddonList(addonStr){
+  if(!addonStr)return[];
+  return addonStr.split(',').map(s=>{
+    const t=s.trim();if(!t)return null;
+    const f=ADDONS_DATA.find(x=>t.includes(x.name)||x.name.includes(t));
+    return{name:f?.name||t,price:f?parsePrice(f.price):0};
+  }).filter(Boolean);
+}
+function buildCoLineHtml(name,price){return`<div class="co-item indent"><span>${name}</span><span>${fmtMoney(price)}</span></div>`}
+function fillCoServiceLines(containerId,b){
+  const el=document.getElementById(containerId);if(!el)return;
+  const svcName=(b.svc||'Service').split(' — ')[0];
+  el.innerHTML=buildCoLineHtml(svcName,getSvcPrice(b.svc));
+}
+function fillCoAddonLines(sectionId,containerId,b){
+  const items=parseAddonList(b.addon);
+  const sec=document.getElementById(sectionId),el=document.getElementById(containerId);
+  if(!sec||!el)return;
+  if(!items.length){sec.style.display='none';el.innerHTML='';return}
+  sec.style.display='block';
+  el.innerHTML=items.map(a=>buildCoLineHtml(a.name,a.price)).join('');
+}
+function getCheckoutServiceTotal(b){return getSvcPrice(b.svc)+getAddonPrices(b.addon)}
+function getCheckoutSubtotal(b){
+  const disc=parseFloat(document.getElementById('co-discount')?.value)||0;
+  return Math.max(0,getCheckoutServiceTotal(b)-disc);
+}
+function loadTipPresets(){
+  try{
+    const s=localStorage.getItem('sunshine_tip_presets');
+    if(s){const p=JSON.parse(s);if(Array.isArray(p)&&p.length>=3)TIP_PRESETS=p.slice(0,3)}
+  }catch(e){}
+  ['tip-pct-1','tip-pct-2','tip-pct-3'].forEach((id,i)=>{const el=document.getElementById(id);if(el)el.value=TIP_PRESETS[i]??[10,20,30][i]});
+}
+function saveTipPresets(){
+  TIP_PRESETS=[1,2,3].map(i=>Math.max(0,Math.min(100,Number(document.getElementById('tip-pct-'+i)?.value)||[10,20,30][i-1])));
+  localStorage.setItem('sunshine_tip_presets',JSON.stringify(TIP_PRESETS));
+  if(document.getElementById('modal-bkdetail')?.classList.contains('on')&&selBkIdx>=0)buildTipButtons();
+}
+function buildTipButtons(){
+  const g=document.getElementById('co-tip-btns');if(!g)return;
+  const btns=TIP_PRESETS.map(p=>`<button type="button" class="tip-btn ${selectedTipPct===p?'on':''}" onclick="applyTipPercent(${p})">${p}%</button>`).join('');
+  g.innerHTML=btns+`<button type="button" class="tip-btn custom ${selectedTipPct==='custom'?'on':''}" onclick="applyTipCustom()">${tr('custom')}</button>`;
+}
+function applyTipPercent(pct){
+  const b=BOOKINGS[selBkIdx];if(!b)return;
+  selectedTipPct=pct;
+  const sub=getCheckoutServiceTotal(b);
+  document.getElementById('co-tip').value=Math.round(sub*pct/100*100)/100;
+  buildTipButtons();updateCheckoutTotal();
+}
+function applyTipCustom(){selectedTipPct='custom';buildTipButtons();document.getElementById('co-tip')?.focus()}
+function onTipCustomInput(){selectedTipPct='custom';buildTipButtons();updateCheckoutTotal()}
+function onCheckoutInputChange(){if(selectedTipPct&&selectedTipPct!=='custom')applyTipPercent(selectedTipPct);else updateCheckoutTotal()}
+function bookingStartMins(b){return b.h*60+b.m}
+function bookingEndMins(b){return bookingStartMins(b)+b.dur}
+function bookingsOverlap(b1,b2){
+  if(b1===b2)return false;
+  if((b1.bookingDate||'')!==(b2.bookingDate||''))return false;
+  if(b1.col!==b2.col)return false;
+  const s1=bookingStartMins(b1),e1=bookingEndMins(b1),s2=bookingStartMins(b2),e2=bookingEndMins(b2);
+  return s1<e2&&s2<e1;
+}
+function hasBookingConflict(b,excludeId){
+  return ALL_BOOKINGS.some(x=>{
+    if(excludeId&&x.id&&x.id===excludeId)return false;
+    if(x===b)return false;
+    return bookingsOverlap(b,x);
+  });
+}
+function showConflictMsg(msg){
+  const err=document.getElementById('nb-error');
+  if(err&&document.getElementById('modal-newbk')?.classList.contains('on')){err.textContent=msg;err.style.display='block';return}
+  alert(msg);
+}
 const ROOMS_DATA=['Room 1','Room 2','Room 3','VIP Room','Couple Room','Group Room'];
 const HOURS_DATA=[{d:'Monday',open:true,from:'10:00',to:'21:00'},{d:'Tuesday',open:true,from:'10:00',to:'21:00'},{d:'Wednesday',open:true,from:'10:00',to:'21:00'},{d:'Thursday',open:true,from:'10:00',to:'21:00'},{d:'Friday',open:true,from:'10:00',to:'22:00'},{d:'Saturday',open:true,from:'09:00',to:'22:00'},{d:'Sunday',open:false,from:'10:00',to:'18:00'}];
 const INTAKE_FIELDS=[{label:'Full Name',type:'text'},{label:'Age',type:'number'},{label:'Phone',type:'tel'},{label:'Medical Conditions',type:'text'},{label:'Allergies',type:'text'},{label:'Pregnant',type:'yesno'},{label:'Recent Surgery',type:'text'},{label:'Pressure Preference',type:'select'},{label:'Notes',type:'text'}];
@@ -931,7 +1049,11 @@ let BOOKINGS=[];
 const QUEUE_DATA=[{num:1,name:'Pam',next:'Facial — Jira',time:'11:30'},{num:2,name:'Jane',next:'Oil Massage — Porn',time:'11:00'},{num:3,name:'Noon',next:'Couple Massage — Manee',time:'13:00'}];
 const PAYROLL_DATA=[{name:'Pam',color:'#fdf0f3',tc:'#8a1a30',hrs:176,clients:48,sales:28400,commSvc:3400,commAddon:960,commSpecial:1320,tip:2850,paid:true},{name:'Noon',color:'#eaf3fc',tc:'#0c447c',hrs:160,clients:42,sales:25200,commSvc:3000,commAddon:840,commSpecial:1200,tip:2520,paid:true},{name:'Min',color:'#eaf6ef',tc:'#185a32',hrs:184,clients:55,sales:19800,commSvc:2400,commAddon:660,commSpecial:900,tip:1980,paid:false},{name:'Jane',color:'#fdf6e7',tc:'#7d5a00',hrs:168,clients:38,sales:22100,commSvc:2800,commAddon:780,commSpecial:840,tip:2210,paid:false},{name:'Bo',color:'#f4f0fe',tc:'#3c3489',hrs:120,clients:28,sales:16400,commSvc:2000,commAddon:480,commSpecial:800,tip:1640,paid:true}];
 
-let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash';
+let currentRole='owner',dateOffset=0,prPeriod='month',slPeriod='month',bkView='today',dragBkIdx=-1,selBkIdx=-1,selClientId=-1,selectedPayMethod='Cash',selectedTipPct=null,queueMode='manual',bkSuppressClick=false;
+const DRAG_HOLD_MS=450;
+const LATE_GRACE_MINS=5;
+const NO_SHOW_MINS=30;
+let TIP_PRESETS=[10,20,30];
 
 /* ==================== SUPABASE ==================== */
 const SUPABASE_URL='https://bjzhmdpuzfbpkvohntjx.supabase.co';
@@ -1093,6 +1215,11 @@ async function saveNewBooking(){
   const req=document.getElementById('nb-req').value==='yes'&&!!staffReq;
   const staff=staffReq||'';
   const col=req?Math.max(1,STAFF_DATA.findIndex(s=>s.name===staffReq)+1):1;
+  const testBk={bookingDate,h,m,dur,col,id:null};
+  if(hasBookingConflict(testBk)){
+    errEl.textContent='This time slot conflicts with another booking for the same staff.';
+    errEl.style.display='block';return;
+  }
   const row={
     booking_date:bookingDate,h,m,dur,fname,lname,phone,name:guest,svc,
     staff_col:col,status:'pending',req,addon:getSelectedAddons(),
@@ -1128,12 +1255,31 @@ function fmtDateISO(d){return`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(
 function getWeekStart(){const d=getBkDate();const day=d.getDay();const diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d}
 function setBkView(v,el){bkView=v;document.querySelectorAll('.bk-view-tab').forEach(t=>t.classList.remove('on'));if(el)el.classList.add('on');const sf=document.getElementById('staff-filter');if(sf)sf.style.display=v==='weekly'?'none':'';syncBookingsView();renderSch()}
 function bkBlockCls(b){return b.status==='pending'?'bb-yellow':b.status==='confirm'?'bb-blue':b.status==='inservice'?'bb-green':'bb-gray'}
+function onBkBlockClick(idx){if(bkSuppressClick){bkSuppressClick=false;return}openBkDetail(idx)}
+function onBkMouseDown(e,idx){
+  if(BOOKINGS[idx]?.req)return;
+  const block=e.currentTarget;
+  clearTimeout(block._holdT);
+  block._holdT=setTimeout(()=>{block.setAttribute('draggable','true');block.classList.add('hold-drag-ready')},DRAG_HOLD_MS);
+}
+function onBkMouseUp(e,idx){
+  const block=e.currentTarget;
+  clearTimeout(block._holdT);
+  setTimeout(()=>{block.removeAttribute('draggable');block.classList.remove('hold-drag-ready')},150);
+}
+function onBkTouchStart(e,idx){onBkMouseDown(e,idx)}
+function onBkTouchEnd(e,idx){onBkMouseUp(e,idx)}
 function bkBlockHtml(b,idx,mode){
-  const cls=bkBlockCls(b),rowH=Math.round(b.dur/15)*36,endMins=b.h*60+b.m+b.dur;
-  const dragAttr=b.req?'':' draggable="true" ondragstart="onBkDragStart(event,'+idx+')" ondragend="onBkDragEnd(event)"';
+  const cls=bkBlockCls(b),rowH=Math.round(b.dur/15)*36;
   const noDrag=b.req?' no-drag':'';
   const blockCls=mode==='wk'?'wk-block':'bk-block';
-  return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" ${dragAttr} onclick="openBkDetail(${idx})">
+  if(mode==='wk'){
+    return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px" onclick="onBkBlockClick(${idx})"><div class="bb-name">${b.fname||b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div></div>`;
+  }
+  const endMins=b.h*60+b.m+b.dur;
+  const holdEv=b.req?'':' onmousedown="onBkMouseDown(event,'+idx+')" onmouseup="onBkMouseUp(event,'+idx+')" onmouseleave="onBkMouseUp(event,'+idx+')" ontouchstart="onBkTouchStart(event,'+idx+')" ontouchend="onBkTouchEnd(event,'+idx+')"';
+  const dragEv=b.req?'':' ondragstart="onBkDragStart(event,'+idx+')" ondragend="onBkDragEnd(event,'+idx+')"'+holdEv;
+  return`<div class="${blockCls} ${cls}${noDrag}" style="height:${rowH-4}px"${dragEv} onclick="onBkBlockClick(${idx})">
     <div class="bb-name">${b.fname||b.name}${b.req?'<i class="ti ti-star req-icon"></i>':''}</div>
     <div class="bb-meta">${b.svc}</div>
     <div class="bb-meta">${fmt12(b.h,b.m)} — ${fmt12(Math.floor(endMins/60),endMins%60)} · ${minsToHM(b.dur)}</div>
@@ -1184,7 +1330,13 @@ async function saveBkReschedule(){
   const timeVal=document.getElementById('br-time').value;
   const dur=Number(document.getElementById('br-dur').value)||60;
   const [h,m]=timeVal.split(':').map(Number);
+  const prev={bookingDate:b.bookingDate,h:b.h,m:b.m,dur:b.dur,weekDay:b.weekDay};
   b.bookingDate=dateVal;b.h=h;b.m=m;b.dur=dur;b.weekDay=calcWeekDay(dateVal);
+  if(hasBookingConflict(b,b.id)){
+    Object.assign(b,prev);
+    showConflictMsg('This time slot conflicts with another booking.');
+    return;
+  }
   await persistBookingPatch(b,{bookingDate:dateVal,h,m,dur,weekDay:b.weekDay});
   syncBookingsView();renderSch();renderBoard();
   selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
@@ -1221,6 +1373,7 @@ async function saveBkEdit(){
   b.staff=document.getElementById('be-staff').value;
   b.req=document.getElementById('be-req').value==='yes';
   if(b.req&&b.staff){const ci=STAFF_DATA.findIndex(s=>s.name===b.staff);if(ci>=0)b.col=ci+1}
+  if(hasBookingConflict(b,b.id)){showConflictMsg('This time slot conflicts with another booking.');return}
   await persistBookingPatch(b,{svc:b.svc,addon:b.addon,notes:b.notes,staff:b.staff,req:b.req,col:b.col});
   syncBookingsView();renderSch();renderBoard();
   selBkIdx=BOOKINGS.findIndex(x=>x.id===b.id||(x===b));
@@ -1245,14 +1398,12 @@ function openBkCheckout(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
   document.getElementById('co-client').textContent=`Client: ${b.fname||b.name||''} — ${b.lname||''}`.trim();
   document.getElementById('co-staff').textContent=b.staff||'—';
-  document.getElementById('co-svc-lbl').textContent=b.svc||'Service';
-  document.getElementById('co-svc-price').textContent=fmtMoney(getSvcPrice(b.svc));
-  const ap=getAddonPrices(b.addon);
-  document.getElementById('co-addon-row').style.display=b.addon&&ap?'flex':'none';
-  document.getElementById('co-addon-lbl').textContent=b.addon||'Add-on';
-  document.getElementById('co-addon-price').textContent=fmtMoney(ap);
+  fillCoServiceLines('co-svc-lines',b);
+  fillCoAddonLines('co-addon-section','co-addon-lines',b);
   document.getElementById('co-discount').value=b.discount||0;
   document.getElementById('co-tip').value=b.tip||0;
+  selectedTipPct=null;
+  buildTipButtons();
   buildPayMethods('co-pay-methods',b.paymentMethod||'Cash');
   updateCheckoutTotal();
   showBkPanel('checkout');
@@ -1261,12 +1412,11 @@ function openBkPaymentDetail(){
   const b=BOOKINGS[selBkIdx];if(!b)return;
   document.getElementById('pd-client').textContent=`Client: ${b.fname||b.name||''} — ${b.lname||''}`.trim();
   document.getElementById('pd-staff').textContent=b.staff||'—';
-  document.getElementById('pd-svc-price').textContent=`${b.svc||'Service'} — ${fmtMoney(getSvcPrice(b.svc))}`;
-  const ap=getAddonPrices(b.addon);
-  document.getElementById('pd-addon-row').style.display=b.addon&&ap?'flex':'none';
-  document.getElementById('pd-addon-price').textContent=b.addon?`${b.addon} — ${fmtMoney(ap)}`:'—';
+  fillCoServiceLines('pd-svc-lines',b);
+  fillCoAddonLines('pd-addon-section','pd-addon-lines',b);
   document.getElementById('pd-discount').textContent=fmtMoney(b.discount||0);
   document.getElementById('pd-tip').textContent=fmtMoney(b.tip||0);
+  const ap=getAddonPrices(b.addon);
   const total=Math.max(0,getSvcPrice(b.svc)+ap-(b.discount||0)+(b.tip||0));
   document.getElementById('pd-total').textContent=fmtMoney(total);
   document.getElementById('pd-method').textContent=b.paymentMethod||'—';
@@ -1289,11 +1439,34 @@ function openBkIntake(idx){
   if(title)title.innerHTML=`${tr('intake_form')} — ${b.fname||b.name} ${b.lname||''}<span class="modal-close" onclick="closeModal('intake')">&times;</span>`;
   openModal('intake');
 }
-function onBkDragStart(e,idx){if(BOOKINGS[idx].req){e.preventDefault();return}e.stopPropagation();dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',idx)}
-function onBkDragEnd(e){e.target.classList.remove('dragging');dragBkIdx=-1;document.querySelectorAll('.tcell.drop-over').forEach(c=>c.classList.remove('drop-over'))}
-function onCellDragOver(e){if(dragBkIdx<0||BOOKINGS[dragBkIdx].req)return;e.preventDefault();e.currentTarget.classList.add('drop-over')}
-function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over')}
-function onCellDrop(e,col,h,m){e.preventDefault();e.currentTarget.classList.remove('drop-over');if(dragBkIdx<0)return;const b=BOOKINGS[dragBkIdx];if(!b||b.req)return;b.col=col;b.h=h;b.m=m;if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;persistBookingPatch(b,{col,h,m,staff:b.staff});syncBookingsView();renderSch();renderBoard()}
+function onBkDragStart(e,idx){if(BOOKINGS[idx]?.req){e.preventDefault();return}e.stopPropagation();bkSuppressClick=true;dragBkIdx=idx;e.target.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',String(idx))}
+function onBkDragEnd(e){e.target.classList.remove('dragging');dragBkIdx=-1;document.querySelectorAll('.tcell.drop-over,.tcell.drop-conflict').forEach(c=>c.classList.remove('drop-over','drop-conflict'))}
+function onCellDragOver(e){
+  if(dragBkIdx<0||BOOKINGS[dragBkIdx]?.req)return;
+  e.preventDefault();
+  const cell=e.currentTarget;
+  cell.classList.remove('drop-over','drop-conflict');
+  const b=BOOKINGS[dragBkIdx];
+  const col=Number(cell.dataset.col),h=Number(cell.dataset.h),m=Number(cell.dataset.m);
+  if(!col)return;
+  const trial={...b,col,h,m};
+  if(hasBookingConflict(trial,b.id))cell.classList.add('drop-conflict');
+  else cell.classList.add('drop-over');
+}
+function onCellDragLeave(e){e.currentTarget.classList.remove('drop-over','drop-conflict')}
+function onCellDrop(e,col,h,m){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drop-over','drop-conflict');
+  if(dragBkIdx<0)return;
+  const b=BOOKINGS[dragBkIdx];
+  if(!b||b.req)return;
+  const trial={...b,col,h,m};
+  if(hasBookingConflict(trial,b.id)){showConflictMsg('This time slot conflicts with another booking.');dragBkIdx=-1;return}
+  b.col=col;b.h=h;b.m=m;
+  if(!b.staff&&STAFF_DATA[col-1])b.staff=STAFF_DATA[col-1].name;
+  persistBookingPatch(b,{col,h,m,staff:b.staff});
+  syncBookingsView();renderSch();renderBoard();
+}
 function renderSch(){
   if(bkView==='weekly'){renderSchWeekly();return}
   const COLS=5,filter=document.getElementById('staff-filter')?.value||'';
@@ -1306,7 +1479,7 @@ function renderSch(){
     html+=`<div class="time-lbl" style="font-size:${isH?'10':'9'}px;${isH?'font-weight:500':'opacity:.45'}">${fmt12(h,m)}</div>`;
     for(let c=1;c<=COLS;c++){
       if(filter&&STAFF_DATA[c-1]?.name!==filter){html+=`<div class="tcell"></div>`;continue}
-      html+=`<div class="tcell" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
+      html+=`<div class="tcell" data-col="${c}" data-h="${h}" data-m="${m}" ondragover="onCellDragOver(event)" ondragleave="onCellDragLeave(event)" ondrop="onCellDrop(event,${c},${h},${m})">`;
       BOOKINGS.forEach((b,bi)=>{if(b.col===c&&b.h===h&&b.m===m)html+=bkBlockHtml(b,bi,'day')});
       html+='</div>';
     }
@@ -1395,11 +1568,28 @@ function setupModalBackdropClose(){
   });
 }
 function chgDate(d){dateOffset+=d;updateDateLbl();syncBookingsView();renderSch();if(document.getElementById('bk-cal-popup')?.classList.contains('on'))buildBkCal(false)}
-function setMode(m,el){document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));el.classList.add('on')}
-
-let editRowIdx=-1;
-function openEditBoard(idx){editRowIdx=idx;const b=BOOKINGS[idx];document.getElementById('eb-name').textContent=`${b.name} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
-function saveEditBoard(){if(editRowIdx>=0){BOOKINGS[editRowIdx].intime=document.getElementById('eb-in').value;BOOKINGS[editRowIdx].outtime=document.getElementById('eb-out').value;BOOKINGS[editRowIdx].staff=document.getElementById('eb-staff').value;}closeModal('editboard');renderBoard();renderSch()}
+function setMode(m,el){queueMode=m;document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');renderBoard()}
+function getQueueDisplayStatus(b){
+  if(b.status==='cancel'||b.status==='done')return b.status;
+  const nowMins=new Date().getHours()*60+new Date().getMinutes();
+  const start=bookingStartMins(b);
+  if(!b.intime){
+    if(nowMins>=start+NO_SHOW_MINS)return 'cancel';
+    if(nowMins>start+LATE_GRACE_MINS)return 'delay';
+  }
+  return b.status;
+}
+function renderBoardStaffCell(b,canEdit,oi){
+  const reqMark=b.req?'<span class="req-mark">★</span>':'';
+  if(queueMode==='auto'){
+    if(b.status==='inservice'||b.status==='done')return reqMark+(b.staff||'—');
+    return '<span style="color:#ccc;font-size:10px">—</span>';
+  }
+  const disp=getQueueDisplayStatus(b);
+  if((disp==='inservice'||disp==='done'||disp==='confirm')&&b.staff)return reqMark+b.staff;
+  if(canEdit)return `<button class="btn btn-sm" style="padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-user-plus" style="font-size:10px"></i>Assign</button>`;
+  return '<span style="color:#999;font-size:10px">—</span>';
+}
 
 function renderBoard(){
   const canEdit=currentRole==='owner'||currentRole==='manager';
@@ -1407,29 +1597,42 @@ function renderBoard(){
   let html='';
   sorted.forEach(b=>{
     const oi=BOOKINGS.indexOf(b);
-    const cls=b.status==='inservice'?'s-inservice':b.status==='confirm'?'s-confirm':b.status==='done'?'s-done':'';
-    const pill={inservice:'<span class="spill">In Service</span>',confirm:'<span class="spill">Confirmed</span>',done:'<span class="spill">Done</span>',pending:'<span class="spill sp-wait">Waiting</span>'}[b.status]||'';
-    const showStaff=b.status==='inservice'||b.status==='done'||b.status==='confirm';
-    const inOut=b.intime?(b.outtime?`${b.intime} — ${b.outtime}`:`${b.intime} — ...`):'—';
+    const dispStatus=getQueueDisplayStatus(b);
+    const cls=dispStatus==='inservice'?'s-inservice':dispStatus==='confirm'?'s-confirm':dispStatus==='done'?'s-done':dispStatus==='delay'?'s-delay':dispStatus==='cancel'?'s-cancel':'';
+    const pill={
+      inservice:`<span class="spill">${tr('in_service')}</span>`,
+      confirm:`<span class="spill">${tr('confirmed')}</span>`,
+      done:`<span class="spill">${tr('completed')}</span>`,
+      pending:`<span class="spill sp-wait">${tr('pending')}</span>`,
+      delay:`<span class="spill sp-delay">${tr('delay')}</span>`,
+      cancel:`<span class="spill sp-cancel">${tr('cancel')}</span>`
+    }[dispStatus]||'';
     const bEnd=b.h*60+b.m+b.dur;
     html+=`<div class="board-row ${cls}">
       <div><div style="font-size:11px;font-family:monospace;font-weight:500">${pad2(b.h)}:${pad2(b.m)} — ${pad2(Math.floor(bEnd/60))}:${pad2(bEnd%60)}</div><div style="font-size:10px;color:#888;margin-top:2px">${minsToHM(b.dur)}</div></div>
-      <div><div style="font-size:11px;font-family:monospace">${inOut}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
+      <div><div style="font-size:11px;font-family:monospace;font-weight:500">${fmt12(b.h,b.m)}</div>${canEdit?`<button class="btn btn-sm" style="margin-top:3px;padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-edit" style="font-size:10px"></i>Edit</button>`:''}</div>
       <div><div class="brow-name">${b.name}</div><div class="brow-svc">${b.svc}</div>${b.addon?`<div class="brow-addon">+${b.addon}</div>`:''} ${pill}</div>
-      <div>${showStaff&&b.staff?`<span style="font-size:11px">${b.staff}</span>`:canEdit?`<button class="btn btn-sm" style="padding:2px 7px;font-size:10px" onclick="openEditBoard(${oi})"><i class="ti ti-user-plus" style="font-size:10px"></i>Assign</button>`:'<span style="color:#999;font-size:10px">—</span>'}</div>
-      <div style="font-size:11px">${b.room}</div><div></div>
+      <div style="font-size:11px">${renderBoardStaffCell(b,canEdit,oi)}</div>
+      <div style="font-size:11px">${b.room||'—'}</div><div></div>
     </div>`;
   });
   document.getElementById('board-rows').innerHTML=html;
   document.getElementById('q-list').innerHTML=QUEUE_DATA.map(q=>`<div class="q-item"><div class="q-num">${q.num}</div><div class="q-name">${q.name}</div><div class="q-next">${q.next}</div><div class="q-time">${q.time}</div></div>`).join('');
 }
 
+let editRowIdx=-1;
+function openEditBoard(idx){editRowIdx=idx;const b=BOOKINGS[idx];document.getElementById('eb-name').textContent=`${b.name} — ${b.svc}`;document.getElementById('eb-in').value=b.intime||'';document.getElementById('eb-out').value=b.outtime||'';document.getElementById('eb-staff').value=b.staff||'';openModal('editboard')}
+function saveEditBoard(){if(editRowIdx>=0){BOOKINGS[editRowIdx].intime=document.getElementById('eb-in').value;BOOKINGS[editRowIdx].outtime=document.getElementById('eb-out').value;BOOKINGS[editRowIdx].staff=document.getElementById('eb-staff').value;}closeModal('editboard');renderBoard();renderSch()}
+
+let lastBoardMin=-1;
 function updateClock(){
   const n=new Date(),p=v=>String(v).padStart(2,'0');
   const c=document.getElementById('b-clock'),d=document.getElementById('b-date');
   if(c)c.textContent=`${p(n.getHours())}:${p(n.getMinutes())}`;
   const da=DAYS_ABBR[currentLang]||DAYS_ABBR.en,mn=MONTH_NAMES[currentLang]||MONTH_NAMES.en;
   if(d)d.textContent=`${da[n.getDay()]} ${n.getDate()} ${mn[n.getMonth()]} ${n.getFullYear()}`;
+  const curMin=n.getHours()*60+n.getMinutes();
+  if(curMin!==lastBoardMin&&document.getElementById('page-display')?.classList.contains('on')){lastBoardMin=curMin;renderBoard()}
 }
 
 function renderStaff(){document.getElementById('staff-cards').innerHTML=STAFF_DATA.map(s=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border:var(--bd);border-radius:var(--r);margin-bottom:6px"><div style="width:34px;height:34px;border-radius:50%;background:${s.color};color:${s.tc};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0">${s.name[0]}</div><div style="flex:1"><div style="font-size:13px;font-weight:500">${s.full} <span style="font-size:11px;color:#888">(${s.name})</span></div><div style="font-size:11px;color:#888">${s.role}</div></div><span class="badge ${s.status==='on'?'b-green':'b-gray'}">${s.status==='on'?tr('ready'):tr('on_leave')}</span><button class="btn btn-sm"><i class="ti ti-edit"></i>Edit</button></div>`).join('')}
@@ -1541,7 +1744,7 @@ function doLogout() {
 }
 
 /* INIT */
-updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();renderClients();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
+updateDateLbl();buildCalGrids();buildBkCal();buildLangPopup();setupModalBackdropClose();loadTipPresets();renderClients();renderStaff();renderServices();renderRooms();renderHours();renderIntake();renderRoles();renderModalAddon();renderWdaySel();renderPayroll();renderSales();updateClock();
 initSupabase();
 setInterval(updateClock,1000);applyLang();
 // Show login on load — don't call setRole, wait for login
