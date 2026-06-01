@@ -1839,11 +1839,27 @@ function doLogout() {
 }
 
 function initBrandLogos(){
-  const path=location.pathname.replace(/\\/g,'/').toLowerCase();
-  const inSunshineFolder=path.includes('/sunshine/')||path.endsWith('/sunshine/index.html');
-  const src=inSunshineFolder?'assets/sunshine-logo.png':'sunshine/assets/sunshine-logo.png';
-  document.querySelectorAll('.brand-logo').forEach(el=>{el.src=src});
-  const fav=document.querySelector('link[rel="icon"]');if(fav)fav.href=src;
+  const href=location.href.replace(/\\/g,'/').toLowerCase();
+  const rootCopy=href.includes('sunshine.html')&&!href.includes('/sunshine/index.html');
+  const paths=rootCopy
+    ?['sunshine/assets/sunshine-logo.png','assets/sunshine-logo.png']
+    :['assets/sunshine-logo.png','sunshine/assets/sunshine-logo.png'];
+  function apply(abs){
+    document.querySelectorAll('.brand-logo').forEach(el=>{el.src=abs;el.onerror=function(){
+      const next=paths.map(p=>new URL(p,location.href).href).find(u=>u!==this.src);
+      if(next){this.onerror=null;this.src=next;}
+    }});
+    const fav=document.querySelector('link[rel="icon"]');if(fav)fav.href=abs;
+  }
+  let i=0;const probe=new Image();
+  function tryNext(){
+    if(i>=paths.length)return;
+    const abs=new URL(paths[i++],location.href).href;
+    probe.onload=()=>apply(abs);
+    probe.onerror=tryNext;
+    probe.src=abs;
+  }
+  tryNext();
 }
 
 /* INIT */
