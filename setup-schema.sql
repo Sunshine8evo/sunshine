@@ -1,5 +1,4 @@
--- Run in Supabase Dashboard → SQL Editor → New query → Run
--- (same content as setup-schema.sql + realtime)
+-- Sunshine Booking System — full schema (idempotent)
 
 CREATE TABLE IF NOT EXISTS public.staff (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -105,11 +104,4 @@ BEGIN
     EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE USING (true)', t || '_update', t);
     EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE USING (true)', t || '_delete', t);
   END LOOP;
-END $$;
-
-DO $$
-BEGIN
-  ALTER PUBLICATION supabase_realtime ADD TABLE public.bookings;
-EXCEPTION
-  WHEN duplicate_object THEN NULL;
 END $$;

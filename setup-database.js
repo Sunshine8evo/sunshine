@@ -1,13 +1,21 @@
 /**
- * Sunshine Booking System — Supabase database setup
- * Creates tables (if missing), enables RLS, and seeds sample data.
+ * Sunshine Booking System — Supabase setup
+ * Creates tables (staff, services, addons, rooms, bookings) and seeds sample data.
  *
- * Uses SUPABASE_URL + SUPABASE_KEY for data operations.
- * For DDL (CREATE TABLE), set SUPABASE_DB_PASSWORD or DATABASE_URL.
+ * Credentials (in order of use for CREATE TABLE):
+ *   1. DATABASE_URL or SUPABASE_DB_PASSWORD
+ *   2. SUPABASE_ACCESS_TOKEN (Supabase Management API)
+ *
+ * Data insert uses SUPABASE_URL + SUPABASE_KEY (anon key).
  */
 
+import { readFileSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://bjzhmdpuzfbpkvohntjx.supabase.co';
 const SUPABASE_KEY =
@@ -16,107 +24,12 @@ const SUPABASE_KEY =
 
 const PROJECT_REF = 'bjzhmdpuzfbpkvohntjx';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+function createSupabaseClient() {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_KEY;
+  return createClient(SUPABASE_URL, key);
+}
 
-const SCHEMA_SQL = `
--- staff
-CREATE TABLE IF NOT EXISTS public.staff (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  full_name TEXT NOT NULL,
-  role TEXT DEFAULT '',
-  color TEXT DEFAULT '#f4f4f4',
-  text_color TEXT DEFAULT '#555555',
-  status TEXT DEFAULT 'on',
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- services
-CREATE TABLE IF NOT EXISTS public.services (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  price NUMERIC NOT NULL DEFAULT 0,
-  duration INTEGER NOT NULL DEFAULT 60,
-  type TEXT DEFAULT 'single',
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- addons
-CREATE TABLE IF NOT EXISTS public.addons (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL,
-  price NUMERIC NOT NULL DEFAULT 0,
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- rooms
-CREATE TABLE IF NOT EXISTS public.rooms (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name TEXT NOT NULL UNIQUE,
-  capacity INTEGER DEFAULT 1,
-  status TEXT DEFAULT 'active',
-  sort_order INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- bookings
-CREATE TABLE IF NOT EXISTS public.bookings (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  booking_date DATE NOT NULL,
-  h INTEGER NOT NULL DEFAULT 10,
-  m INTEGER NOT NULL DEFAULT 0,
-  dur INTEGER NOT NULL DEFAULT 60,
-  fname TEXT,
-  lname TEXT,
-  phone TEXT,
-  name TEXT,
-  svc TEXT,
-  staff_col INTEGER DEFAULT 1,
-  status TEXT DEFAULT 'pending',
-  req BOOLEAN DEFAULT false,
-  addon TEXT DEFAULT '',
-  staff TEXT DEFAULT '',
-  room TEXT DEFAULT '',
-  intime TEXT DEFAULT '',
-  outtime TEXT DEFAULT '',
-  week_day INTEGER DEFAULT 0,
-  notes TEXT DEFAULT '',
-  client_id INTEGER DEFAULT 0,
-  discount NUMERIC DEFAULT 0,
-  tip NUMERIC DEFAULT 0,
-  payment_method TEXT DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
-ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS discount NUMERIC DEFAULT 0;
-ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS tip NUMERIC DEFAULT 0;
-ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT '';
-
--- RLS
-ALTER TABLE public.staff ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.services ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.addons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.rooms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
-
-DO $$
-DECLARE t TEXT;
-BEGIN
-  FOREACH t IN ARRAY ARRAY['staff','services','addons','rooms','bookings'] LOOP
-    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t || '_select', t);
-    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t || '_insert', t);
-    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t || '_update', t);
-    EXECUTE format('DROP POLICY IF EXISTS %I ON public.%I', t || '_delete', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR SELECT USING (true)', t || '_select', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR INSERT WITH CHECK (true)', t || '_insert', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR UPDATE USING (true)', t || '_update', t);
-    EXECUTE format('CREATE POLICY %I ON public.%I FOR DELETE USING (true)', t || '_delete', t);
-  END LOOP;
-END $$;
-`;
+const supabase = createSupabaseClient();
 
 const SEED_STAFF = [
   { name: 'Pam', full_name: 'Pamrin Suksong', role: 'Massage Therapist', color: '#fdf0f3', text_color: '#8a1a30', status: 'on', sort_order: 1 },
@@ -167,9 +80,14 @@ function buildSeedBookings(date) {
   ];
 }
 
+function parseCliPassword() {
+  const arg = process.argv.find((a) => a.startsWith('--db-password='));
+  return arg ? arg.split('=').slice(1).join('=') : process.env.SUPABASE_DB_PASSWORD || null;
+}
+
 function getPgConnectionString() {
   if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  const password = process.env.SUPABASE_DB_PASSWORD;
+  const password = parseCliPassword();
   if (!password) return null;
   const host = process.env.SUPABASE_DB_HOST || `db.${PROJECT_REF}.supabase.co`;
   const port = process.env.SUPABASE_DB_PORT || '5432';
@@ -178,75 +96,202 @@ function getPgConnectionString() {
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
 }
 
-async function runSchemaSql() {
+function loadSchemaSql() {
+  return readFileSync(join(__dirname, 'setup-schema.sql'), 'utf8');
+}
+
+async function runSchemaViaPg() {
   const connStr = getPgConnectionString();
-  if (!connStr) {
-    console.log('⚠  SUPABASE_DB_PASSWORD / DATABASE_URL not set — skipping DDL.');
-    console.log('   Tables must already exist (run supabase-setup.sql in SQL Editor).');
-    return false;
-  }
+  if (!connStr) return false;
 
   const client = new pg.Client({ connectionString: connStr, ssl: { rejectUnauthorized: false } });
   await client.connect();
   try {
-    await client.query(SCHEMA_SQL);
-    console.log('✓ Schema created / updated via PostgreSQL');
+    await client.query(loadSchemaSql());
+    console.log('✓ Schema applied via PostgreSQL');
     return true;
   } finally {
     await client.end();
   }
 }
 
+async function runSchemaViaManagementApi() {
+  const token = process.env.SUPABASE_ACCESS_TOKEN;
+  if (!token) return false;
+
+  const sql = loadSchemaSql();
+  const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/database/query`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query: sql }),
+  });
+
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Management API ${res.status}: ${body}`);
+  }
+  console.log('✓ Schema applied via Supabase Management API');
+  return true;
+}
+
+async function ensureSchema() {
+  if (await runSchemaViaPg()) return true;
+  if (await runSchemaViaManagementApi()) return true;
+
+  const missing = await listMissingTables();
+  if (missing.length === 0) return true;
+
+  console.log('⚠  Cannot run CREATE TABLE with anon key only.');
+  console.log('   Missing tables:', missing.join(', '));
+  console.log('   Option A: set SUPABASE_DB_PASSWORD and re-run');
+  console.log('           $env:SUPABASE_DB_PASSWORD="your-db-password"; node setup-database.js');
+  console.log('   Option B: paste setup-schema.sql into Supabase Dashboard → SQL Editor → Run');
+  return false;
+}
+
 async function tableExists(table) {
-  const { error } = await supabase.from(table).select('id', { count: 'exact', head: true });
+  const { error } = await supabase.from(table).select('id').limit(1);
   if (!error) return true;
-  if (error.code === 'PGRST205' || error.message?.includes('does not exist') || error.message?.includes('Could not find')) {
+  const msg = error.message || '';
+  if (msg.includes('does not exist') || msg.includes('Could not find') || error.code === 'PGRST205') {
     return false;
   }
-  throw new Error(`${table}: ${error.message}`);
+  throw new Error(`${table}: ${msg}`);
+}
+
+async function listMissingTables() {
+  const tables = ['staff', 'services', 'addons', 'rooms', 'bookings'];
+  const missing = [];
+  for (const t of tables) {
+    if (!(await tableExists(t))) missing.push(t);
+  }
+  return missing;
+}
+
+async function detectBookingColumns() {
+  const probe = {
+    booking_date: '2026-06-01',
+    h: 9,
+    m: 0,
+    dur: 60,
+    fname: 'X',
+    lname: 'Y',
+    phone: '000',
+    name: 'X Y',
+    svc: 'Thai Massage',
+    staff_col: 1,
+    status: 'pending',
+    req: false,
+    addon: '',
+    staff: 'Pam',
+    room: 'Room 1',
+    intime: '',
+    outtime: '',
+    week_day: 0,
+    notes: '',
+    client_id: 0,
+    discount: 0,
+    tip: 0,
+    payment_method: '',
+  };
+  const valid = {};
+  let row = { ...probe };
+  for (let guard = 0; guard < 30; guard++) {
+    const { error } = await supabase.from('bookings').insert(row);
+    if (!error) {
+      await supabase.from('bookings').delete().eq('booking_date', '2026-06-01').eq('phone', '000');
+      return Object.keys(row);
+    }
+    const missing = error.message?.match(/'([^']+)' column/);
+    if (missing) {
+      delete row[missing[1]];
+      continue;
+    }
+    if (error.message?.includes('row-level security')) {
+      return Object.keys(row);
+    }
+    throw new Error(`bookings probe: ${error.message}`);
+  }
+  return Object.keys(row);
+}
+
+function pickColumns(row, allowed) {
+  const out = {};
+  for (const key of allowed) {
+    if (row[key] !== undefined) out[key] = row[key];
+  }
+  return out;
 }
 
 async function seedIfEmpty(table, rows) {
   const { count, error: countErr } = await supabase.from(table).select('*', { count: 'exact', head: true });
   if (countErr) throw new Error(`${table} count: ${countErr.message}`);
   if (count > 0) {
-    console.log(`  · ${table}: already has ${count} row(s), skip seed`);
+    console.log(`  · ${table}: ${count} row(s) already — skip seed`);
     return 0;
   }
-  const { error } = await supabase.from(table).insert(rows);
-  if (error) throw new Error(`${table} insert: ${error.message}`);
-  console.log(`  ✓ ${table}: inserted ${rows.length} row(s)`);
-  return rows.length;
+
+  let payload = rows;
+  if (table === 'bookings') {
+    const cols = await detectBookingColumns();
+    payload = rows.map((r) => pickColumns(r, cols));
+  }
+
+  const { error } = await supabase.from(table).insert(payload);
+  if (error) {
+    if (error.message?.includes('row-level security')) {
+      throw new Error(
+        `${table} insert blocked by RLS. Run setup-schema.sql in Supabase SQL Editor, or set SUPABASE_DB_PASSWORD / SUPABASE_SERVICE_ROLE_KEY and re-run.`
+      );
+    }
+    throw new Error(`${table} insert: ${error.message}`);
+  }
+  console.log(`  ✓ ${table}: inserted ${payload.length} row(s)`);
+  return payload.length;
 }
+
+const TABLE_SEEDS = {
+  staff: SEED_STAFF,
+  services: SEED_SERVICES,
+  addons: SEED_ADDONS,
+  rooms: SEED_ROOMS,
+  bookings: () => buildSeedBookings(todayISO()),
+};
 
 async function main() {
   console.log('Sunshine — Supabase Database Setup');
-  console.log('URL:', SUPABASE_URL);
+  console.log('Project:', PROJECT_REF);
   console.log('');
 
-  await runSchemaSql();
+  await ensureSchema();
+  const missing = await listMissingTables();
+  const ready = ['staff', 'services', 'addons', 'rooms', 'bookings'].filter((t) => !missing.includes(t));
 
-  const tables = ['staff', 'services', 'addons', 'rooms', 'bookings'];
-  for (const t of tables) {
-    const exists = await tableExists(t);
-    if (!exists) {
-      console.error(`✗ Table "${t}" does not exist.`);
-      console.error('  Set SUPABASE_DB_PASSWORD (Project Settings → Database) and re-run,');
-      console.error('  or paste supabase-setup.sql + this script schema into Supabase SQL Editor.');
-      process.exit(1);
-    }
+  if (missing.length > 0) {
+    console.log('⚠  Tables not ready:', missing.join(', '));
+    if (ready.length === 0) process.exit(1);
+    console.log('   Continuing seed for existing tables:', ready.join(', '));
+  } else {
+    console.log('✓ All tables ready: staff, services, addons, rooms, bookings');
   }
-  console.log('✓ All 5 tables are accessible');
 
   console.log('\nSeeding sample data...');
+
   let total = 0;
-  total += await seedIfEmpty('staff', SEED_STAFF);
-  total += await seedIfEmpty('services', SEED_SERVICES);
-  total += await seedIfEmpty('addons', SEED_ADDONS);
-  total += await seedIfEmpty('rooms', SEED_ROOMS);
-  total += await seedIfEmpty('bookings', buildSeedBookings(todayISO()));
+  for (const table of ready) {
+    const rows = typeof TABLE_SEEDS[table] === 'function' ? TABLE_SEEDS[table]() : TABLE_SEEDS[table];
+    total += await seedIfEmpty(table, rows);
+  }
 
   console.log(`\nDone. ${total} new row(s) inserted.`);
+  if (missing.length > 0) {
+    console.log('\nTo create missing tables, set your database password and re-run:');
+    console.log('  $env:SUPABASE_DB_PASSWORD="<password>"; node setup-database.js');
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {
